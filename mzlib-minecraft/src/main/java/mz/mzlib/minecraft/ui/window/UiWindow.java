@@ -234,7 +234,7 @@ public class UiWindow extends UiAbstractWindow
                 })
             ));
             this.register(new EventListener<>(
-                EventAsyncPlayerDisplayItemInWindow.class, Priority.VERY_LOW,
+                EventAsyncPlayerDisplayItemInWindow.class, Priority.VERY_HIGH,
                 event -> event.sync(() ->
                 {
                     if(Option.some(event).filter(Cancellable.class).map(Cancellable::isCancelled).unwrapOr(false))

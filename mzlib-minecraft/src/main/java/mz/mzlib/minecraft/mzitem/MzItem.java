@@ -154,7 +154,7 @@ public interface MzItem extends ItemStack
             this.register(RegistrarMzItem.instance);
 
             this.register(new EventListener<>(
-                EventAsyncPlayerDisplayItem.class, Priority.VERY_HIGH,
+                EventAsyncPlayerDisplayItem.class, Priority.LOW,
                 this::onAsyncPlayerDisplayItem
             ));
 

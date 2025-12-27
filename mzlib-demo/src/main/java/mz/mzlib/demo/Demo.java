@@ -2,29 +2,24 @@ package mz.mzlib.demo;
 
 import mz.mzlib.demo.game.tictactoe.Tictactoe;
 import mz.mzlib.i18n.I18n;
-import mz.mzlib.minecraft.Identifier;
 import mz.mzlib.minecraft.MinecraftJsUtil;
-import mz.mzlib.minecraft.MinecraftServer;
 import mz.mzlib.minecraft.command.ChildCommandRegistration;
 import mz.mzlib.minecraft.command.Command;
-import mz.mzlib.minecraft.item.Item;
 import mz.mzlib.minecraft.item.ItemStack;
 import mz.mzlib.minecraft.permission.Permission;
-import mz.mzlib.minecraft.recipe.IngredientVanilla;
-import mz.mzlib.minecraft.recipe.RegistrarRecipeVanilla;
-import mz.mzlib.minecraft.recipe.crafting.RecipeCraftingShaped;
-import mz.mzlib.minecraft.recipe.smelting.RecipeFurnace;
 import mz.mzlib.minecraft.text.Text;
 import mz.mzlib.minecraft.ui.UiStack;
 import mz.mzlib.minecraft.ui.window.UiWindowRect;
 import mz.mzlib.minecraft.ui.window.control.UiWindowList;
 import mz.mzlib.module.MzModule;
-import mz.mzlib.util.*;
+import mz.mzlib.util.CollectionUtil;
+import mz.mzlib.util.Config;
+import mz.mzlib.util.IOUtil;
+import mz.mzlib.util.RuntimeUtil;
 
 import java.awt.*;
 import java.io.File;
 import java.io.InputStream;
-import java.util.Collections;
 
 public class Demo extends MzModule
 {
@@ -86,26 +81,7 @@ public class Demo extends MzModule
             this.register(ExampleAsyncFunction.instance);
             this.register(DemoTest.instance);
 
-            this.register(RecipeCraftingShaped.builder()
-                .id(Identifier.of("mzlib:test"))
-                .width(1).height(1).ingredients(
-                    Collections.singletonList(
-                        Option.some(IngredientVanilla.of(ItemStack.newInstance(Item.fromId("stick"))))))
-                .result(ItemStack.builder().fromId("apple").build()).buildVanillaRegistration());
-            this.register(RecipeCraftingShaped.builder()
-                .id(Identifier.of("mzlib:test11"))
-                .width(1).height(1).ingredients(
-                    Collections.singletonList(
-                        Option.some(is -> !is.isEmpty())))
-                .result(ItemStack.builder().fromId("apple").build()).buildRegistration());
-            this.register(RecipeFurnace.builder()
-                .id(Identifier.of("mzlib:test_smelting"))
-                .ingredient(ItemStack.newInstance(Item.fromId("stick")))
-                .result(ItemStack.builder().fromId("apple").build())
-                .experience(100.f)
-                .buildRegistration());
-            MinecraftServer.instance.schedule(
-                () -> System.out.println(RegistrarRecipeVanilla.instance.getEnabledRecipes()));
+            this.register(DemoRecipe.instance);
         }
         catch(Throwable e)
         {
