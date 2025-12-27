@@ -7,9 +7,11 @@ import mz.mzlib.minecraft.item.ItemStack;
 import mz.mzlib.minecraft.item.Items;
 import mz.mzlib.minecraft.recipe.Ingredient;
 import mz.mzlib.minecraft.recipe.IngredientVanilla;
+import mz.mzlib.minecraft.recipe.RecipeMojang;
 import mz.mzlib.minecraft.recipe.book.RecipeCraftingCategoryV1903;
 import mz.mzlib.util.Option;
 import mz.mzlib.util.compound.Compound;
+import mz.mzlib.util.compound.CompoundOverride;
 import mz.mzlib.util.compound.PropAccessor;
 import mz.mzlib.util.wrapper.SpecificImpl;
 import mz.mzlib.util.wrapper.WrapConstructor;
@@ -52,18 +54,34 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
     void setIngredients(List<? extends Option<? extends Ingredient>> value);
 
     @Override
+    @PropAccessor("groupV1200")
+    Option<String> getGroupV1200();
+    @PropAccessor("groupV1200")
+    void setGroupV1200(Option<String> value);
+
+    @Override
     @PropAccessor("idV1300_2002")
     Identifier getIdV1300_2002();
     @PropAccessor("idV1300_2002")
     void setIdV1300_2002(Identifier value);
 
-    @VersionRange(begin = 1903)
-    @PropAccessor("categoryV1903")
-    void setCategoryV1903(RecipeCraftingCategoryV1903 value);
     @Override
     @VersionRange(begin = 1903)
     @PropAccessor("categoryV1903")
     RecipeCraftingCategoryV1903 getCategoryV1903();
+    @VersionRange(begin = 1903)
+    @PropAccessor("categoryV1903")
+    void setCategoryV1903(RecipeCraftingCategoryV1903 value);
+
+    @Override
+    @VersionRange(begin = 1904)
+    @PropAccessor("notificationEnabledV1904")
+    @CompoundOverride(parent = RecipeMojang.class, method = "isNotificationEnabledV1904")
+    boolean isNotificationEnabledV1904();
+    @VersionRange(begin = 1904)
+    @PropAccessor("notificationEnabledV1904")
+    void setNotificationEnabledV1904(boolean value);
+
 
     static RecipeCraftingShapedImpl of(Builder builder)
     {
@@ -136,38 +154,74 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
         result.setIngredients(builder.ingredients);
         return result;
     }
+    @VersionRange(begin = 1200)
+    default RecipeCraftingShapedImpl static$of$commonV1200(Builder builder)
+    {
+        RecipeCraftingShapedImpl result = this.static$of$common(builder);
+        result.setGroupV1200(builder.groupV1200);
+        return result;
+    }
+    @VersionRange(begin = 1903)
+    default RecipeCraftingShapedImpl static$of$commonV1903(Builder builder)
+    {
+        RecipeCraftingShapedImpl result = this.static$of$commonV1200(builder);
+        result.setCategoryV1903(builder.categoryV1903);
+        return result;
+    }
     @SpecificImpl("static$of")
-    @VersionRange(end = 1300)
-    default RecipeCraftingShapedImpl static$ofV_1300(Builder builder)
+    @VersionRange(end = 1200)
+    default RecipeCraftingShapedImpl static$ofV_1200(Builder builder)
     {
         return static$of$common(builder);
+    }
+    @SpecificImpl("static$of")
+    @VersionRange(begin = 1200, end = 1300)
+    default RecipeCraftingShapedImpl static$ofV1200_1300(Builder builder)
+    {
+        return static$of$commonV1200(builder);
     }
     @SpecificImpl("static$of")
     @VersionRange(begin = 1300, end = 1903)
     default RecipeCraftingShapedImpl static$ofV1300_1903(Builder builder)
     {
-        RecipeCraftingShapedImpl result = static$of$common(builder);
+        RecipeCraftingShapedImpl result = static$of$commonV1200(builder);
         result.setIdV1300_2002(builder.getId());
         return result;
     }
     @SpecificImpl("static$of")
-    @VersionRange(begin = 1903, end = 2002)
-    default RecipeCraftingShapedImpl static$ofV1903_2002(Builder builder)
+    @VersionRange(begin = 1903, end = 1904)
+    default RecipeCraftingShapedImpl static$ofV1903_1904(Builder builder)
     {
-        RecipeCraftingShapedImpl result = static$of$common(builder);
+        RecipeCraftingShapedImpl result = static$of$commonV1903(builder);
         result.setIdV1300_2002(builder.getId());
-        result.setCategoryV1903(builder.categoryV1903);
+        return result;
+    }
+    @SpecificImpl("static$of")
+    @VersionRange(begin = 1904, end = 2002)
+    default RecipeCraftingShapedImpl static$ofV1904_2002(Builder builder)
+    {
+        RecipeCraftingShapedImpl result = static$of$commonV1903(builder);
+        result.setIdV1300_2002(builder.getId());
+        result.setNotificationEnabledV1904(builder.notificationEnabledV1904);
         return result;
     }
     @SpecificImpl("static$of")
     @VersionRange(begin = 2002)
     default RecipeCraftingShapedImpl static$ofV2002(Builder builder)
     {
-        RecipeCraftingShapedImpl result = static$of$common(builder);
-        result.setCategoryV1903(builder.categoryV1903);
+        RecipeCraftingShapedImpl result = static$of$commonV1903(builder);
+        result.setNotificationEnabledV1904(builder.notificationEnabledV1904);
         return result;
     }
 
     @WrapConstructor
     RecipeCraftingShapedImpl static$of();
+
+    @Override
+    @VersionRange(begin = 1700)
+    @CompoundOverride(parent = RecipeMojang.class, method = "getGroup0V1700")
+    default String getGroup0V1700()
+    {
+        return this.getGroupV1200().unwrapOr("");
+    }
 }

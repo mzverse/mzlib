@@ -2,6 +2,7 @@ package mz.mzlib.minecraft.recipe.crafting;
 
 import mz.mzlib.minecraft.Identifier;
 import mz.mzlib.minecraft.MinecraftPlatform;
+import mz.mzlib.minecraft.VersionRange;
 import mz.mzlib.minecraft.item.ItemStack;
 import mz.mzlib.minecraft.recipe.Ingredient;
 import mz.mzlib.minecraft.recipe.IngredientVanilla;
@@ -27,6 +28,9 @@ public interface RecipeCraftingShaped extends RecipeCrafting
     int getHeight();
     List<? extends Option<? extends Ingredient>> getIngredients();
 
+    @VersionRange(begin = 1200)
+    Option<String> getGroupV1200();
+
     static Builder builder()
     {
         return new Builder();
@@ -37,8 +41,8 @@ public interface RecipeCraftingShaped extends RecipeCrafting
         ItemStack result;
         Integer width, height;
         List<? extends Option< ? extends Ingredient>> ingredients;
-        String groupV1200 = "";
-        boolean showNotificationV1904 = true;
+        Option<String> groupV1200 = Option.none();
+        boolean notificationEnabledV1904 = true;
         RecipeCraftingCategoryV1903 categoryV1903 = CATEGORY_DEFAULT_V1903;
         static RecipeCraftingCategoryV1903 CATEGORY_DEFAULT_V1903 =
             MinecraftPlatform.instance.getVersion() < 1903 ? null : RecipeCraftingCategoryV1903.MISC;
@@ -69,12 +73,12 @@ public interface RecipeCraftingShaped extends RecipeCrafting
         }
         public Builder groupV1200(String value)
         {
-            this.groupV1200 = value;
+            this.groupV1200 = Option.some(value);
             return this;
         }
-        public Builder showNotificationV1904(boolean value)
+        public Builder notificationEnabledV1904(boolean value)
         {
-            this.showNotificationV1904 = value;
+            this.notificationEnabledV1904 = value;
             return this;
         }
         public Builder categoryV1903(RecipeCraftingCategoryV1903 value)
@@ -124,6 +128,10 @@ public interface RecipeCraftingShaped extends RecipeCrafting
                 throw new IllegalArgumentException("ingredient is not vanilla: "+ingredient);
             }
             return RuntimeUtil.cast(this.ingredients);
+        }
+        public String getGroup0V1200()
+        {
+            return this.groupV1200.unwrapOr("");
         }
         DefaultedListV1100<?> getIngredientsV1200_2003()
         {

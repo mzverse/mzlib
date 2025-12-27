@@ -16,6 +16,7 @@ import mz.mzlib.minecraft.wrapper.WrapMinecraftFieldAccessor;
 import mz.mzlib.minecraft.wrapper.WrapMinecraftInnerClass;
 import mz.mzlib.util.FunctionInvertible;
 import mz.mzlib.util.Option;
+import mz.mzlib.util.ThrowablePredicate;
 import mz.mzlib.util.proxy.ListProxy;
 import mz.mzlib.util.wrapper.SpecificImpl;
 import mz.mzlib.util.wrapper.WrapConstructor;
@@ -79,6 +80,12 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
         return Identifier.ofMinecraft(UUID.nameUUIDFromBytes(stream.toByteArray()).toString());
     }
 
+    @VersionRange(begin = 1200)
+    default Option<String> getGroupV1200()
+    {
+        return Option.some(this.getGroup0V1200()).filter(ThrowablePredicate.of(String::isEmpty).negate());
+    }
+
     @VersionRange(begin = 1300)
     @WrapMinecraftInnerClass(outer = RecipeCraftingShapedVanilla.class, name = {
         @VersionName(name = "class_3581", end = 1400),
@@ -111,7 +118,7 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
     default RecipeCraftingShapedVanilla static$ofV1200_1300(Builder builder)
     {
         return this.static$of0V1200_1300(
-            builder.groupV1200, builder.width, builder.height, builder.getIngredientsV1200_2003(), builder.result);
+            builder.getGroup0V1200(), builder.width, builder.height, builder.getIngredientsV1200_2003(), builder.result);
     }
     @VersionRange(begin = 1200, end = 1300)
     @WrapConstructor
@@ -127,7 +134,7 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
     default RecipeCraftingShapedVanilla static$ofV1300_1903(Builder builder)
     {
         return this.static$of0V1300_1903(
-            builder.getId(), builder.groupV1200, builder.width, builder.height,
+            builder.getId(), builder.getGroup0V1200(), builder.width, builder.height,
             builder.getIngredientsV1200_2003(), builder.result
         );
     }
@@ -146,7 +153,7 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
     default RecipeCraftingShapedVanilla static$ofV1903_1904(Builder builder)
     {
         return this.static$of0V1903_1904(
-            builder.getId(), builder.groupV1200, builder.categoryV1903, builder.width, builder.height,
+            builder.getId(), builder.getGroup0V1200(), builder.categoryV1903, builder.width, builder.height,
             builder.getIngredientsV1200_2003(), builder.result
         );
     }
@@ -167,8 +174,8 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
     default RecipeCraftingShapedVanilla static$ofV1904_2002(Builder builder)
     {
         return this.static$of0V1904_2002(
-            builder.getId(), builder.groupV1200, builder.categoryV1903, builder.width, builder.height,
-            builder.getIngredientsV1200_2003(), builder.result, builder.showNotificationV1904
+            builder.getId(), builder.getGroup0V1200(), builder.categoryV1903, builder.width, builder.height,
+            builder.getIngredientsV1200_2003(), builder.result, builder.notificationEnabledV1904
         );
     }
     @VersionRange(begin = 1904, end = 2002)
@@ -189,8 +196,8 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
     default RecipeCraftingShapedVanilla static$ofV2002_2003(Builder builder)
     {
         return this.static$of0V2002_2003(
-            builder.groupV1200, builder.categoryV1903, builder.width, builder.height,
-            builder.getIngredientsV1200_2003(), builder.result, builder.showNotificationV1904
+            builder.getGroup0V1200(), builder.categoryV1903, builder.width, builder.height,
+            builder.getIngredientsV1200_2003(), builder.result, builder.notificationEnabledV1904
         );
     }
     @VersionRange(begin = 2002, end = 2003)
@@ -209,9 +216,9 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
     default RecipeCraftingShapedVanilla static$ofV2003(Builder builder)
     {
         return this.static$ofV2003(
-            builder.groupV1200, builder.categoryV1903,
+            builder.getGroup0V1200(), builder.categoryV1903,
             RawShapedRecipeV2003.of(builder.width, builder.height, builder.getIngredientsVanilla(), Option.none()),
-            builder.result, builder.showNotificationV1904
+            builder.result, builder.notificationEnabledV1904
         );
     }
     @VersionRange(begin = 2003)
@@ -283,4 +290,10 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
     {
         return this.getRawV2003().getIngredients();
     }
+
+    @WrapMinecraftFieldAccessor({
+        @VersionName(name = "field_15687", end = 1400),
+        @VersionName(name = "group", begin = 1400)
+    })
+    String getGroup0V1200();
 }

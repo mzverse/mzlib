@@ -253,6 +253,17 @@ public interface RecipeMojang extends WrapperObject, RecipeVanilla
     @WrapMinecraftMethod(@VersionName(name = "fits"))
     boolean fitsV1700_2102(int width, int height);
 
+    @VersionRange(begin = 1904)
+    @WrapMinecraftMethod(@VersionName(name = "showNotification"))
+    boolean isNotificationEnabledV1904();
+
+    /**
+     * Usually client only: V1200
+     */
+    @VersionRange(begin = 1700)
+    @WrapMinecraftMethod(@VersionName(name = "getGroup"))
+    String getGroup0V1700();
+
     @VersionRange(begin = 2102)
     @WrapMinecraftMethod(@VersionName(name = "getDisplays"))
     List<Object> getDisplays0V2102();
