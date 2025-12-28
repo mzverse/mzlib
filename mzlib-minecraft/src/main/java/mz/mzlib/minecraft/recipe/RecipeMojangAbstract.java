@@ -19,6 +19,7 @@ import mz.mzlib.minecraft.util.collection.DefaultedListV1100;
 import mz.mzlib.minecraft.world.World;
 import mz.mzlib.module.MzModule;
 import mz.mzlib.util.FunctionInvertible;
+import mz.mzlib.util.Option;
 import mz.mzlib.util.RuntimeUtil;
 import mz.mzlib.util.compound.Compound;
 import mz.mzlib.util.compound.CompoundOverride;
@@ -50,6 +51,8 @@ public interface RecipeMojangAbstract<I extends RecipeMojangAbstract.Input> exte
 
     @Override
     Identifier getIdV1300_2002();
+
+    Option<String> getGroupV1700();
 
     interface Input
     {
@@ -234,6 +237,14 @@ public interface RecipeMojangAbstract<I extends RecipeMojangAbstract.Input> exte
     default ItemStack getResultV2100(RecipeInputV2100 input, RegistryWrapperV1903.class_7874 lookup)
     {
         return this.getResult(this.inputV2100(input));
+    }
+
+    @Override
+    @VersionRange(begin = 1700)
+    @CompoundOverride(parent = RecipeMojang.class, method = "getGroup0V1700")
+    default String getGroup0V1700()
+    {
+        return this.getGroupV1700().unwrapOr("");
     }
 
     @VersionRange(begin = 1300, end = 2002)

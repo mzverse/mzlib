@@ -424,6 +424,8 @@ public interface ItemStack extends WrapperObject
     @SpecificImpl("clone")
     default ItemStack clone$impl()
     {
+        if(this.isEmpty())
+            return EMPTY;
         return this.clone(this.getItem());
     }
     @Deprecated

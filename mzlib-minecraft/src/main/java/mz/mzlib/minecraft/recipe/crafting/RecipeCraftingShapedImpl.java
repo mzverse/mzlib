@@ -53,11 +53,10 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
     @PropAccessor("ingredients")
     void setIngredients(List<? extends Option<? extends Ingredient>> value);
 
-    @Override
-    @PropAccessor("groupV1200")
-    Option<String> getGroupV1200();
-    @PropAccessor("groupV1200")
-    void setGroupV1200(Option<String> value);
+    @PropAccessor("group")
+    Option<String> getGroup();
+    @PropAccessor("group")
+    void setGroup(Option<String> value);
 
     @Override
     @PropAccessor("idV1300_2002")
@@ -148,23 +147,17 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
             return Option.<IngredientVanilla>none();
         }).collect(Collectors.toList());
         result.setDisplay(display.buildVanilla());
+        result.setGroup(builder.group);
         result.setResult(builder.result);
         result.setWidth(builder.width);
         result.setHeight(builder.height);
         result.setIngredients(builder.ingredients);
         return result;
     }
-    @VersionRange(begin = 1200)
-    default RecipeCraftingShapedImpl static$of$commonV1200(Builder builder)
-    {
-        RecipeCraftingShapedImpl result = this.static$of$common(builder);
-        result.setGroupV1200(builder.groupV1200);
-        return result;
-    }
     @VersionRange(begin = 1903)
     default RecipeCraftingShapedImpl static$of$commonV1903(Builder builder)
     {
-        RecipeCraftingShapedImpl result = this.static$of$commonV1200(builder);
+        RecipeCraftingShapedImpl result = this.static$of$common(builder);
         result.setCategoryV1903(builder.categoryV1903);
         return result;
     }
@@ -178,13 +171,13 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
     @VersionRange(begin = 1200, end = 1300)
     default RecipeCraftingShapedImpl static$ofV1200_1300(Builder builder)
     {
-        return static$of$commonV1200(builder);
+        return this.static$of$common(builder);
     }
     @SpecificImpl("static$of")
     @VersionRange(begin = 1300, end = 1903)
     default RecipeCraftingShapedImpl static$ofV1300_1903(Builder builder)
     {
-        RecipeCraftingShapedImpl result = static$of$commonV1200(builder);
+        RecipeCraftingShapedImpl result = this.static$of$common(builder);
         result.setIdV1300_2002(builder.getId());
         return result;
     }
@@ -218,10 +211,13 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
     RecipeCraftingShapedImpl static$of();
 
     @Override
-    @VersionRange(begin = 1700)
-    @CompoundOverride(parent = RecipeMojang.class, method = "getGroup0V1700")
-    default String getGroup0V1700()
+    default Option<String> getGroupV1200()
     {
-        return this.getGroupV1200().unwrapOr("");
+        return this.getGroup();
+    }
+    @Override
+    default Option<String> getGroupV1700()
+    {
+        return this.getGroup();
     }
 }

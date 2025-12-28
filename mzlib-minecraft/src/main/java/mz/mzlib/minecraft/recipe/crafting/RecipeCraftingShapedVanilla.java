@@ -80,6 +80,7 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
         return Identifier.ofMinecraft(UUID.nameUUIDFromBytes(stream.toByteArray()).toString());
     }
 
+    @Override
     @VersionRange(begin = 1200)
     default Option<String> getGroupV1200()
     {
@@ -291,6 +292,7 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
         return this.getRawV2003().getIngredients();
     }
 
+    @VersionRange(begin = 1200)
     @WrapMinecraftFieldAccessor({
         @VersionName(name = "field_15687", end = 1400),
         @VersionName(name = "group", begin = 1400)

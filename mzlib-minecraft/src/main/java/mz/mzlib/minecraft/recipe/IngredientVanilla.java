@@ -84,6 +84,12 @@ public interface IngredientVanilla extends WrapperObject, Ingredient
     @Override
     Collection<ItemStack> getExamples();
 
+    @Override
+    default ItemStack getRemainder(ItemStack itemStack)
+    {
+        throw new UnsupportedOperationException(); // TODO
+    }
+
     @VersionRange(end = 1200)
     default ItemStack asItemStackV_1200()
     {
@@ -309,12 +315,10 @@ public interface IngredientVanilla extends WrapperObject, Ingredient
     @VersionRange(end = 1200)
     default Collection<ItemStack> getExamplesV_1200()
     {
-        ItemStack result = this.asItemStackV_1200();
+        ItemStack result = this.asItemStackV_1200().clone();
+        result.setCount(1);
         if(result.getDamageV_1300() == Short.MAX_VALUE)
-        {
-            result = result.clone();
             result.setDamageV_1300(0);
-        }
         return Collections.singletonList(result);
     }
     @SpecificImpl("getExamples")
@@ -323,11 +327,10 @@ public interface IngredientVanilla extends WrapperObject, Ingredient
     {
         return new ListProxy<>(this.getDataV1200_1300(), FunctionInvertible.of(is ->
         {
+            is = is.clone();
+            is.setCount(1);
             if(is.getDamageV_1300() == Short.MAX_VALUE)
-            {
-                is = is.clone();
                 is.setDamageV_1300(0);
-            }
             return is;
         }, is -> RuntimeUtil.valueThrow(new UnsupportedOperationException())));
     }

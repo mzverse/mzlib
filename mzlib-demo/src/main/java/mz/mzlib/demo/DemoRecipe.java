@@ -4,14 +4,14 @@ import mz.mzlib.minecraft.Identifier;
 import mz.mzlib.minecraft.MinecraftServer;
 import mz.mzlib.minecraft.item.Item;
 import mz.mzlib.minecraft.item.ItemStack;
+import mz.mzlib.minecraft.mzitem.MzItemDebugStick;
+import mz.mzlib.minecraft.mzitem.RegistrarMzItem;
+import mz.mzlib.minecraft.recipe.Ingredient;
 import mz.mzlib.minecraft.recipe.IngredientVanilla;
 import mz.mzlib.minecraft.recipe.RegistrarRecipeVanilla;
 import mz.mzlib.minecraft.recipe.crafting.RecipeCraftingShaped;
 import mz.mzlib.minecraft.recipe.smelting.RecipeFurnace;
 import mz.mzlib.module.MzModule;
-import mz.mzlib.util.Option;
-
-import java.util.Collections;
 
 public class DemoRecipe extends MzModule
 {
@@ -21,16 +21,25 @@ public class DemoRecipe extends MzModule
     public void onLoad()
     {
         this.register(RecipeCraftingShaped.builder()
-            .id(Identifier.of("mzlib:test"))
-            .width(1).height(1).ingredients(
-                Collections.singletonList(
-                    Option.some(IngredientVanilla.of(ItemStack.newInstance(Item.fromId("stick"))))))
-            .result(ItemStack.builder().fromId("apple").build()).buildVanillaRegistration());
+            .id(Identifier.of("mzlibdemo:test"))
+            .pattern(
+                "AAA",
+                "A A",
+                "AAA"
+            )
+            .where('A', IngredientVanilla.of(ItemStack.newInstance(Item.fromId("stick"))))
+            .finish()
+            .result(ItemStack.builder().fromId("apple").build()).buildRegistration());
         this.register(RecipeCraftingShaped.builder()
-            .id(Identifier.of("mzlib:test11"))
-            .width(1).height(1).ingredients(
-                Collections.singletonList(
-                    Option.some(is -> !is.isEmpty())))
+            .id(Identifier.of("mzlibdemo:test1"))
+            .pattern(
+                "AAA",
+                "ABA",
+                "AAA"
+            )
+            .where('A', Ingredient.of(RegistrarMzItem.instance.newMzItem(MzItemDebugStick.class)))
+            .where('B', Ingredient.builder().predicate(is -> !is.isEmpty()).examples(ItemStack.newInstance(Item.fromId("diamond"))).build())
+            .finish()
             .result(ItemStack.builder().fromId("apple").build()).buildRegistration());
         this.register(RecipeFurnace.builder()
             .id(Identifier.of("mzlib:test_smelting"))

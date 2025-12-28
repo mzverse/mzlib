@@ -16,7 +16,7 @@ import mz.mzlib.util.ThrowablePredicate;
 import mz.mzlib.util.wrapper.WrapSameClass;
 import mz.mzlib.util.wrapper.WrapperFactory;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @WrapSameClass(RecipeCrafting.class)
@@ -31,6 +31,8 @@ public interface RecipeCraftingShaped extends RecipeCrafting
     @VersionRange(begin = 1200)
     Option<String> getGroupV1200();
 
+
+
     static Builder builder()
     {
         return new Builder();
@@ -40,10 +42,10 @@ public interface RecipeCraftingShaped extends RecipeCrafting
         Identifier id;
         ItemStack result;
         Integer width, height;
-        List<? extends Option< ? extends Ingredient>> ingredients;
-        Option<String> groupV1200 = Option.none();
-        boolean notificationEnabledV1904 = true;
+        List<? extends Option<? extends Ingredient>> ingredients;
+        Option<String> group = Option.none();
         RecipeCraftingCategoryV1903 categoryV1903 = CATEGORY_DEFAULT_V1903;
+        boolean notificationEnabledV1904 = true;
         static RecipeCraftingCategoryV1903 CATEGORY_DEFAULT_V1903 =
             MinecraftPlatform.instance.getVersion() < 1903 ? null : RecipeCraftingCategoryV1903.MISC;
         public Builder id(Identifier value)
@@ -71,14 +73,9 @@ public interface RecipeCraftingShaped extends RecipeCrafting
             this.ingredients = value;
             return this;
         }
-        public Builder groupV1200(String value)
+        public Builder group(String value)
         {
-            this.groupV1200 = Option.some(value);
-            return this;
-        }
-        public Builder notificationEnabledV1904(boolean value)
-        {
-            this.notificationEnabledV1904 = value;
+            this.group = Option.some(value);
             return this;
         }
         public Builder categoryV1903(RecipeCraftingCategoryV1903 value)
@@ -86,11 +83,17 @@ public interface RecipeCraftingShaped extends RecipeCrafting
             this.categoryV1903 = value;
             return this;
         }
+        public Builder notificationEnabledV1904(boolean value)
+        {
+            this.notificationEnabledV1904 = value;
+            return this;
+        }
 
         public RecipeCraftingShaped build()
         {
             if(this.isVanilla())
                 return this.buildVanilla();
+            this.check();
             return RecipeCraftingShapedImpl.of(this);
         }
         public RecipeRegistration<RecipeCraftingShaped> buildRegistration()
@@ -101,6 +104,7 @@ public interface RecipeCraftingShaped extends RecipeCrafting
         }
         public RecipeCraftingShapedVanilla buildVanilla()
         {
+            this.check();
             return RecipeCraftingShapedVanilla.of(this);
         }
         public RecipeRegistration<RecipeCraftingShapedVanilla> buildVanillaRegistration()
@@ -109,9 +113,38 @@ public interface RecipeCraftingShaped extends RecipeCrafting
                 throw new IllegalArgumentException("id must be set");
             return RecipeRegistration.of(this.id, this.buildVanilla());
         }
+        public void check()
+        {
+            for(Ingredient countRequired : Option.fromOptional(
+                this.ingredients.stream().flatMap(Option::stream).filter(Ingredient::isCountRequired).findAny()))
+            {
+                throw new IllegalArgumentException("count required: " + countRequired);
+            }
+        }
         public boolean isVanilla()
         {
-            return this.ingredients.stream().flatMap(Option::stream).allMatch(IngredientVanilla.class::isInstance);
+            return checkVanilla(false);
+        }
+        public void checkVanilla()
+        {
+            this.checkVanilla(true);
+        }
+        public boolean checkVanilla(boolean doAssert)
+        {
+            if(this.group.isSome() && MinecraftPlatform.instance.getVersion() < 1200)
+            {
+                if(doAssert)
+                    throw new IllegalArgumentException("group in vanilla is supported when version >= 1.12");
+                return false;
+            }
+            for(Ingredient ingredient : Option.fromOptional(this.ingredients.stream().flatMap(Option::stream)
+                .filter(ThrowablePredicate.of(IngredientVanilla.class::isInstance).negate()).findAny()))
+            {
+                if(doAssert)
+                    throw new IllegalArgumentException("ingredient is not vanilla: " + ingredient);
+                return false;
+            }
+            return true;
         }
 
         public Identifier getId()
@@ -122,23 +155,71 @@ public interface RecipeCraftingShaped extends RecipeCrafting
         }
         List<Option<IngredientVanilla>> getIngredientsVanilla()
         {
-            for(Ingredient ingredient : Option.fromOptional(this.ingredients.stream().flatMap(Option::stream)
-                .filter(ThrowablePredicate.of(IngredientVanilla.class::isInstance).negate()).findAny()))
-            {
-                throw new IllegalArgumentException("ingredient is not vanilla: "+ingredient);
-            }
+            this.checkVanilla();
             return RuntimeUtil.cast(this.ingredients);
         }
         public String getGroup0V1200()
         {
-            return this.groupV1200.unwrapOr("");
+            return this.group.unwrapOr("");
         }
         DefaultedListV1100<?> getIngredientsV1200_2003()
         {
             return DefaultedListV1100.fromWrapper(
-                this.getIngredientsVanilla().stream().map(IngredientVanilla::fromOptionV_2102).collect(Collectors.toList()),
+                this.getIngredientsVanilla().stream().map(IngredientVanilla::fromOptionV_2102)
+                    .collect(Collectors.toList()),
                 IngredientVanilla.EMPTY_V_2102
             );
+        }
+
+        /**
+         * Set width, height, and ingredients from a pattern.
+         */
+        public StepPattern pattern(String... pattern)
+        {
+            return new StepPattern(this, pattern);
+        }
+        public static class StepPattern
+        {
+            Builder builder;
+            String[] pattern;
+            Map<Character, Ingredient> key = new HashMap<>();
+            public StepPattern(Builder builder, String[] pattern)
+            {
+                this.builder = builder;
+                this.pattern = pattern;
+            }
+            public StepPattern where(char c, Ingredient ingredient)
+            {
+                this.key.put(c, ingredient);
+                return this;
+            }
+            public Builder finish()
+            {
+                if(this.pattern.length == 0)
+                    return this.builder.width(0).height(0).ingredients(Collections.emptyList());
+                int width = this.pattern[0].length();
+                if(!Arrays.stream(this.pattern).allMatch(s -> s.length() == width))
+                    throw new IllegalArgumentException(
+                        "all rows must have the same length: " + Arrays.toString(this.pattern));
+                List<Option<Ingredient>> result = new ArrayList<>();
+                for(String row : this.pattern)
+                {
+                    for(int x = 0; x < width; x++)
+                    {
+                        char c = row.charAt(x);
+                        if(c == ' ')
+                            result.add(Option.none());
+                        else
+                        {
+                            Ingredient ingredient = this.key.get(c);
+                            if(ingredient == null)
+                                throw new IllegalArgumentException("no ingredient for key: " + c);
+                            result.add(Option.some(ingredient));
+                        }
+                    }
+                }
+                return this.builder.width(width).height(this.pattern.length).ingredients(result);
+            }
         }
     }
 }

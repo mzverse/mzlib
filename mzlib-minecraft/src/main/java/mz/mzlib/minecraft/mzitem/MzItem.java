@@ -1,6 +1,5 @@
 package mz.mzlib.minecraft.mzitem;
 
-import mz.mzlib.Priority;
 import mz.mzlib.data.DataHandler;
 import mz.mzlib.data.DataKey;
 import mz.mzlib.event.EventListener;
@@ -153,10 +152,7 @@ public interface MzItem extends ItemStack
 
             this.register(RegistrarMzItem.instance);
 
-            this.register(new EventListener<>(
-                EventAsyncPlayerDisplayItem.class, Priority.LOW,
-                this::onAsyncPlayerDisplayItem
-            ));
+            this.register(new EventListener<>(EventAsyncPlayerDisplayItem.class, this::onAsyncPlayerDisplayItem));
 
             this.register(MzItemUsable.Module.instance);
 

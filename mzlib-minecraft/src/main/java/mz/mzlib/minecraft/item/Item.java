@@ -43,8 +43,6 @@ public interface Item extends WrapperObject
         return fromId(Identifier.of(id));
     }
 
-    Item AIR_V1100 = MinecraftPlatform.instance.getVersion() < 1100 ? null : fromId(Identifier.ofMinecraft("air"));
-
     DataKey<ItemStack, Option<NbtCompound>, NbtCompound> CUSTOM_DATA = new DataKey<>("custom_data");
     DataKey<ItemStack, Option<Text>, Void> CUSTOM_NAME = new DataKey<>("custom_name");
     DataKey<ItemStack, Option<List<Text>>, List<Text>> LORE = new DataKey<>("lore");
