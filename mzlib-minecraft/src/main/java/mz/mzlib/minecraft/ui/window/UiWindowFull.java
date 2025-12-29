@@ -21,7 +21,7 @@ public class UiWindowFull extends UiWindow
     }
     public UiWindowFull(int rowsInventory)
     {
-        this(rowsInventory, InventorySimple.newInstance(rowsInventory * 9));
+        this(rowsInventory, InventorySimple.newInstance(9 * (rowsInventory + 4)));
     }
 
     public void initWindow(WindowUiWindow window, EntityPlayer player)
