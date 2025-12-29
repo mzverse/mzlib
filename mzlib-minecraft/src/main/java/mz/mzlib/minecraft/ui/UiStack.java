@@ -95,6 +95,16 @@ public class UiStack
         }
     }
 
+    public void replace(Ui ui)
+    {
+        synchronized(UiStack.class)
+        {
+            viewersMap.get(this.top()).remove(this.player);
+            this.data.remove(this.data.size() - 1);
+            this.go(ui);
+        }
+    }
+
     public Ui top()
     {
         synchronized(UiStack.class)
