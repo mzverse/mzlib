@@ -60,6 +60,12 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
     void setGroup(Option<String> value);
 
     @Override
+    @PropAccessor("horizontalFlipAllowed")
+    boolean isHorizontalFlipAllowed();
+    @PropAccessor("horizontalFlipAllowed")
+    void setHorizontalFlipAllowed(boolean value);
+
+    @Override
     @PropAccessor("idV1300_2002")
     Identifier getIdV1300_2002();
     @PropAccessor("idV1300_2002")
@@ -93,6 +99,16 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
     {
         if(input.getWidth() != this.getWidth() || input.getHeight() != this.getHeight())
             return false;
+        if(this.matches(input, false))
+            return true;
+        if(this.isHorizontalFlipAllowed())
+            return this.matches(input, true);
+        return false;
+    }
+    default boolean matches(Input input, boolean flipped)
+    {
+        if(flipped)
+            input = new InputFlippedHorizontally(input);
         for(int i = 0; i < this.getWidth(); i++)
         {
             l1:
@@ -111,6 +127,30 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
             }
         }
         return true;
+    }
+    class InputFlippedHorizontally implements Input
+    {
+        private final Input delegate;
+        public InputFlippedHorizontally(Input delegate)
+        {
+            this.delegate = delegate;
+        }
+        @Override
+        public int getWidth()
+        {
+            return this.delegate.getWidth();
+        }
+        @Override
+        public int getHeight()
+        {
+            return this.delegate.getHeight();
+        }
+        @Override
+        public ItemStack get(int index)
+        {
+            int x = index % this.getWidth();
+            return this.delegate.get(index - x + (this.getWidth() - 1 - x));
+        }
     }
 
     @Override
@@ -149,6 +189,7 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
         }).collect(Collectors.toList());
         result.setDisplay(display.buildVanilla());
         result.setGroup(builder.group);
+        result.setHorizontalFlipAllowed(builder.horizontalFlipAllowed);
         result.setResult(builder.result);
         result.setWidth(builder.width);
         result.setHeight(builder.height);

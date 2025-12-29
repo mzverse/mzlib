@@ -26,6 +26,10 @@ public interface RecipeCraftingShaped extends RecipeCrafting
     int getWidth();
     int getHeight();
     List<? extends Option<? extends Ingredient>> getIngredients();
+    default boolean isHorizontalFlipAllowed()
+    {
+        return true;
+    }
 
     static Builder builder()
     {
@@ -38,6 +42,7 @@ public interface RecipeCraftingShaped extends RecipeCrafting
         Integer width, height;
         List<? extends Option<? extends Ingredient>> ingredients;
         Option<String> group = Option.none();
+        boolean horizontalFlipAllowed = true;
         RecipeCraftingCategoryV1903 categoryV1903 = CATEGORY_DEFAULT_V1903;
         boolean notificationEnabledV1904 = true;
         static RecipeCraftingCategoryV1903 CATEGORY_DEFAULT_V1903 =
@@ -70,6 +75,11 @@ public interface RecipeCraftingShaped extends RecipeCrafting
         public Builder group(String value)
         {
             this.group = Option.some(value);
+            return this;
+        }
+        public Builder horizontalFlipAllowed(boolean value)
+        {
+            this.horizontalFlipAllowed = value;
             return this;
         }
         public Builder categoryV1903(RecipeCraftingCategoryV1903 value)
@@ -125,6 +135,12 @@ public interface RecipeCraftingShaped extends RecipeCrafting
         }
         public boolean checkVanilla(boolean doAssert)
         {
+            if(!this.horizontalFlipAllowed)
+            {
+                if(doAssert)
+                    throw new IllegalArgumentException("horizontal flip is always allowed in vanilla");
+                return false;
+            }
             if(this.group.isSome() && MinecraftPlatform.instance.getVersion() < 1200)
             {
                 if(doAssert)
