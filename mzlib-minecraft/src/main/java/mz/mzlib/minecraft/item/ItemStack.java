@@ -428,33 +428,12 @@ public interface ItemStack extends WrapperObject
             return EMPTY;
         return this.clone(this.getItem());
     }
-    @Deprecated
-    @Override
-    default ItemStack clone0()
-    {
-        return this.clone();
-    }
     ItemStack clone(Item newItem);
 
     @Override
-    int hashCode0();
-
+    int hashCode();
     @Override
-    default boolean equals0(Object object)
-    {
-        if(this == object)
-            return true;
-        if(!(object instanceof ItemStack))
-            return false;
-        ItemStack that = (ItemStack) object;
-        if(this.getWrapped() == that.getWrapped())
-            return true;
-        if(this.isEmpty() && that.isEmpty())
-            return true;
-        if(this.isEmpty() || that.isEmpty())
-            return false;
-        return this.getCount() == that.getCount() && isStackable(this, that);
-    }
+    boolean equals(Object object);
 
     static NbtCompound upgrade(NbtCompound nbt)
     {
@@ -790,23 +769,40 @@ public interface ItemStack extends WrapperObject
     @WrapMinecraftMethod(@VersionName(name = "method_56701"))
     ItemStack cloneV2005(ItemConvertibleV1300 newItem, int count);
 
-    @SpecificImpl("hashCode0")
+    @SpecificImpl("hashCode")
     @VersionRange(end = 1300)
-    default int hashCode0V_1300()
+    default int hashCodeV_1300()
     {
-        return Objects.hash(this.hashCode0V1300_2005(), this.getDamageV_1300());
+        return Objects.hash(this.hashCodeV1300_2005(), this.getDamageV_1300());
     }
-    @SpecificImpl("hashCode0")
+    @SpecificImpl("hashCode")
     @VersionRange(begin = 1300, end = 2005)
-    default int hashCode0V1300_2005()
+    default int hashCodeV1300_2005()
     {
         return Objects.hash(this.getItem(), this.getCount(), this.getTagV_2005());
     }
-    @SpecificImpl("hashCode0")
+    @SpecificImpl("hashCode")
     @VersionRange(begin = 2005)
-    default int hashCode0V2005()
+    default int hashCodeV2005()
     {
         return Objects.hash(this.getItem(), this.getCount(), this.getComponentsV2005());
+    }
+
+    @SpecificImpl("equals")
+    default boolean equals$impl(Object object)
+    {
+        if(this == object)
+            return true;
+        if(!(object instanceof ItemStack))
+            return false;
+        ItemStack that = (ItemStack) object;
+        if(this.getWrapped() == that.getWrapped())
+            return true;
+        if(this.isEmpty() && that.isEmpty())
+            return true;
+        if(this.isEmpty() || that.isEmpty())
+            return false;
+        return this.getCount() == that.getCount() && isStackable(this, that);
     }
 
     NbtCompound static$upgrade(NbtCompound nbt, int from);

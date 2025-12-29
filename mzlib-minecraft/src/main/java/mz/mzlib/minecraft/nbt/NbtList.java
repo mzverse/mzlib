@@ -200,15 +200,15 @@ public interface NbtList extends NbtElement
 
     default AutoCompletable<NbtCompound, ?> reviseNbtCompound(int index)
     {
-        return AutoCompletable.of(() -> this.getNbtCompound(index).clone0(), child -> this.set(index, child));
+        return AutoCompletable.of(() -> this.getNbtCompound(index).clone(), child -> this.set(index, child));
     }
     default AutoCompletable<NbtList, ?> reviseNbtList(int index)
     {
-        return AutoCompletable.of(() -> this.getNbtList(index).clone0(), child -> this.set(index, child));
+        return AutoCompletable.of(() -> this.getNbtList(index).clone(), child -> this.set(index, child));
     }
 
     @Override
-    default NbtList clone0()
+    default NbtList clone()
     {
         NbtList result = newInstance();
         for(NbtElement i : this.asList())

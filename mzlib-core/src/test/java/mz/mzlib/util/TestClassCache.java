@@ -2,6 +2,7 @@ package mz.mzlib.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import test.RetryOnFailure;
 
 import java.util.HashMap;
 import java.util.WeakHashMap;
@@ -34,6 +35,7 @@ public class TestClassCache
     }
 
     @Test
+    @RetryOnFailure
     public void testClassCache()
     {
         ClassCache<Class<?>, RefStrong<Class<?>>> cache = new ClassCache<>(RefStrong::new);

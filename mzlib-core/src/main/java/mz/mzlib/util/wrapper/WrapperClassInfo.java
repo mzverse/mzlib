@@ -256,24 +256,28 @@ public class WrapperClassInfo
                 if(specificImpl != null)
                 {
                     Class<?>[] pts = m.getParameterTypes();
-                    Method target = m.getDeclaringClass().getMethod(specificImpl.value(), pts);
-                    if(AsmUtil.getMethodNode(cn, target.getName(), AsmUtil.getDesc(target)) != null)
-                        throw new IllegalStateException("Multiple implementations for method: " + target);
-                    mn = new MethodNode(
-                        Opcodes.ACC_PUBLIC, target.getName(), AsmUtil.getDesc(target), null, new String[0]);
-                    mn.instructions.add(AsmUtil.insnVarLoad(WrapperObject.class, 0));
-                    for(int i = 0, j = 1; i < pts.length; i++)
+                    Method target = this.getWrapperClass().getMethod(specificImpl.value(), pts);
+                    if(target.getDeclaringClass().isAssignableFrom(m.getDeclaringClass()))
                     {
-                        mn.instructions.add(AsmUtil.insnVarLoad(pts[i], j));
-                        j += AsmUtil.getCategory(pts[i]);
+                        if(AsmUtil.getMethodNode(cn, target.getName(), AsmUtil.getDesc(target)) != null)
+                            throw new IllegalStateException("Multiple implementations for method: " + target); // TODO: allow override
+                        mn = new MethodNode(
+                            Opcodes.ACC_PUBLIC, target.getName(), AsmUtil.getDesc(target), null, new String[0]);
+                        mn.instructions.add(AsmUtil.insnVarLoad(WrapperObject.class, 0));
+                        for(int i = 0, j = 1; i < pts.length; i++)
+                        {
+                            mn.instructions.add(AsmUtil.insnVarLoad(pts[i], j));
+                            j += AsmUtil.getCategory(pts[i]);
+                        }
+                        mn.visitMethodInsn(
+                            Opcodes.INVOKEINTERFACE, AsmUtil.getType(getWrapperClass()), m.getName(),
+                            AsmUtil.getDesc(m),
+                            true
+                        );
+                        mn.instructions.add(AsmUtil.insnReturn(target.getReturnType()));
+                        mn.visitEnd();
+                        cn.methods.add(mn);
                     }
-                    mn.visitMethodInsn(
-                        Opcodes.INVOKEINTERFACE, AsmUtil.getType(getWrapperClass()), m.getName(), AsmUtil.getDesc(m),
-                        true
-                    );
-                    mn.instructions.add(AsmUtil.insnReturn(target.getReturnType()));
-                    mn.visitEnd();
-                    cn.methods.add(mn);
                 }
             }
             mn = new MethodNode(

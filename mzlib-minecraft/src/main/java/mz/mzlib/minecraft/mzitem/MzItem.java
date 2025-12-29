@@ -143,7 +143,7 @@ public interface MzItem extends ItemStack
                         }
                     }
                 })
-                .reviserGetter(o -> o.map(NbtCompound::clone0).unwrapOrGet(NbtCompound::newInstance))
+                .reviserGetter(o -> o.map(NbtCompound::clone).unwrapOrGet(NbtCompound::newInstance))
                 .reviserApplier(data -> Option.some(data).filter(ThrowablePredicate.of(NbtCompound::isEmpty).negate()))
                 .register(this);
             this.register(NothingItemStack.class);

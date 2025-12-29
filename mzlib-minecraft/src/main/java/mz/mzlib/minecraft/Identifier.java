@@ -37,6 +37,11 @@ public interface Identifier extends WrapperObject
         return "minecraft".equals(this.getNamespace());
     }
 
+    default String join(char delimiter)
+    {
+        return this.getName() + delimiter + this.getName();
+    }
+
 
     Identifier static$of(String namespace, String name);
     @SpecificImpl("static$of")

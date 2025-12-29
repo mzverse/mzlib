@@ -362,19 +362,20 @@ public interface IngredientVanilla extends WrapperObject, Ingredient
     void cacheMatchingStacksV1300_1903();
 
     @Override
-    int hashCode0();
+    int hashCode();
     @Override
-    boolean equals0(Object object);
+    boolean equals(Object object);
 
-    @SpecificImpl("hashCode0")
+
+    @SpecificImpl("hashCode")
     @VersionRange(end = 1200)
-    default int hashCode0V_1200()
+    default int hashCodeV_1200()
     {
         return this.asItemStackV_1200().hashCode();
     }
-    @SpecificImpl("equals0")
+    @SpecificImpl("equals")
     @VersionRange(end = 1200)
-    default boolean equals0V_1200(Object object)
+    default boolean equalsV_1200(Object object)
     {
         if(this == object)
             return true;
@@ -382,15 +383,15 @@ public interface IngredientVanilla extends WrapperObject, Ingredient
             return false;
         return Objects.equals(this.asItemStackV_1200(), ((IngredientVanilla) object).asItemStackV_1200());
     }
-    @SpecificImpl("hashCode0")
+    @SpecificImpl("hashCode")
     @VersionRange(begin = 1200, end = 1300)
-    default int hashCode0V1200_1300()
+    default int hashCodeV1200_1300()
     {
         return this.getDataV1200_1300().hashCode();
     }
-    @SpecificImpl("equals0")
+    @SpecificImpl("equals")
     @VersionRange(begin = 1200, end = 1300)
-    default boolean equals0V1200_1300(Object object)
+    default boolean equalsV1200_1300(Object object)
     {
         if(this == object)
             return true;
@@ -401,15 +402,15 @@ public interface IngredientVanilla extends WrapperObject, Ingredient
             return true;
         return Objects.equals(this.getDataV1200_1300(), o.getDataV1200_1300());
     }
-    @SpecificImpl("hashCode0")
+    @SpecificImpl("hashCode")
     @VersionRange(begin = 1300)
-    default int hashCode0V1300()
+    default int hashCodeV1300()
     {
         return this.getMatchingStacksV1300().hashCode();
     }
-    @SpecificImpl("equals0")
+    @SpecificImpl("equals")
     @VersionRange(begin = 1300)
-    default boolean equals0V1300(Object object)
+    default boolean equalsV1300(Object object)
     {
         if(this == object)
             return true;

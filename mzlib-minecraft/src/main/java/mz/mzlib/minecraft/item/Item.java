@@ -217,7 +217,7 @@ public interface Item extends WrapperObject
                     .setter((is, value) -> is.getComponentsV2005()
                         .set(COMPONENT_KEY_CUSTOM_DATA_V2005, value.map(NbtCompoundComponentV2005::newInstance)))
             )
-                .reviserGetter(data -> data.map(NbtCompound::clone0).unwrapOrGet(NbtCompound::newInstance))
+                .reviserGetter(data -> data.map(NbtCompound::clone).unwrapOrGet(NbtCompound::newInstance))
                 .reviserApplier(reviser -> Option.some(reviser)
                     .filter(ThrowablePredicate.ofPredicate(NbtCompound::isEmpty).negate()))
                 .register(this);

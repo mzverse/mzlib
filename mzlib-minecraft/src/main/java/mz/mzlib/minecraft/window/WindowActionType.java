@@ -216,7 +216,10 @@ public interface WindowActionType extends WrapperObject
     WindowActionType static$copyV900();
 
     @Override
-    default String toString0()
+    String toString();
+
+    @SpecificImpl("toString")
+    default String toString$impl()
     {
         if(this.equals(drag()))
             return "DRAG";

@@ -160,22 +160,27 @@ public interface WrapperObject
         return this.getWrapped() != null;
     }
 
+    @Override
     @WrapMethod("toString")
-    String toString0();
+    String toString();
+    @Override
     @WrapMethod("hashCode")
-    int hashCode0();
-    default boolean equals0(Object object)
+    int hashCode();
+    @Override
+    boolean equals(Object object);
+    @SpecificImpl("equals")
+    default boolean equals$impl(Object object)
     {
         if(this == object)
             return true;
         if(!(object instanceof WrapperObject))
             return false;
-        return this.equals0((WrapperObject) object);
+        return this.equals((WrapperObject) object);
     }
     @WrapMethod("equals")
-    boolean equals0(WrapperObject object);
+    boolean equals(WrapperObject object);
     @WrapMethod("clone")
-    WrapperObject clone0();
+    WrapperObject clone();
 
     static FieldInsnNode insnField(int opcode, Class<? extends WrapperObject> owner, String getterName)
         throws NoSuchMethodException

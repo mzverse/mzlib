@@ -277,7 +277,7 @@ public interface NbtCompound extends NbtElement
     default Editor<NbtCompound> reviseNbtCompoundOr(String key, Supplier<NbtCompound> supplier)
     {
         return Editor.of(
-            () -> this.getNbtCompound(key).map(NbtCompound::clone0).unwrapOrGet(supplier),
+            () -> this.getNbtCompound(key).map(NbtCompound::clone).unwrapOrGet(supplier),
             child -> this.put(key, child)
         );
     }
@@ -293,7 +293,7 @@ public interface NbtCompound extends NbtElement
     default Editor<NbtList> reviseNbtListOr(String key, Supplier<NbtList> supplier)
     {
         return Editor.of(
-            () -> this.getNbtList(key).map(NbtList::clone0).unwrapOrGet(supplier), child -> this.put(key, child));
+            () -> this.getNbtList(key).map(NbtList::clone).unwrapOrGet(supplier), child -> this.put(key, child));
     }
 
     @WrapMinecraftFieldAccessor(
@@ -315,7 +315,7 @@ public interface NbtCompound extends NbtElement
     }
 
     @Override
-    default NbtCompound clone0()
+    default NbtCompound clone()
     {
         NbtCompound result = newInstance();
         for(Map.Entry<String, NbtElement> entry : this.asMap().entrySet())
