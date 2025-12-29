@@ -829,14 +829,6 @@ public interface ItemStack extends WrapperObject
         ).getValue();
     }
 
-
-    @Deprecated
-    @WrapperCreator
-    static ItemStack create(Object wrapped)
-    {
-        return WrapperObject.create(ItemStack.class, wrapped);
-    }
-
     /**
      * @see #EMPTY
      */
@@ -844,15 +836,6 @@ public interface ItemStack extends WrapperObject
     static ItemStack empty()
     {
         return EMPTY;
-    }
-
-    /**
-     * @see #encode()
-     */
-    @Deprecated
-    static Result<Option<NbtCompound>, String> encode(ItemStack is)
-    {
-        return is.encode();
     }
 
     /**

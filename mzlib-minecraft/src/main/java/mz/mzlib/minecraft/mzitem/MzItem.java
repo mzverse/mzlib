@@ -162,7 +162,7 @@ public interface MzItem extends ItemStack
 
         public void onAsyncPlayerDisplayItem(EventAsyncPlayerDisplayItem event)
         {
-            for(MzItem mzItem : RegistrarMzItem.instance.toMzItem(event.getOriginal()))
+            for(MzItem mzItem : RegistrarMzItem.instance.toMzItem(event.getItemStack()))
             {
                 mzItem.onDisplay(event);
             }

@@ -9,7 +9,7 @@ import mz.mzlib.minecraft.item.ItemStack;
 import mz.mzlib.minecraft.permission.Permission;
 import mz.mzlib.minecraft.text.Text;
 import mz.mzlib.minecraft.ui.UiStack;
-import mz.mzlib.minecraft.ui.window.UiWindowRect;
+import mz.mzlib.minecraft.ui.window.UiWindowFull;
 import mz.mzlib.minecraft.ui.window.control.UiWindowList;
 import mz.mzlib.module.MzModule;
 import mz.mzlib.util.CollectionUtil;
@@ -52,9 +52,9 @@ public class Demo extends MzModule
                 .setPermissionChecker(Command::checkPermissionSenderPlayer)
                 .setHandler(context ->
                 {
-                    UiWindowRect ui = new UiWindowRect(6);
+                    UiWindowFull ui = new UiWindowFull(6);
                     ui.region.addChild(UiWindowList.overlappedBuilder(CollectionUtil.newArrayList("aaa", "bbb"))
-                        .size(new Dimension(9, 10))
+                        .size(ui.region.getSize())
                         .iconGetter(entry -> ItemStack.builder().fromId("stick").customName(
                             Text.literal(entry.getElement())).build())
                         .adder(() -> "new")
