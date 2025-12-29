@@ -2,7 +2,6 @@ package mz.mzlib.minecraft.recipe.crafting;
 
 import mz.mzlib.minecraft.Identifier;
 import mz.mzlib.minecraft.MinecraftPlatform;
-import mz.mzlib.minecraft.VersionRange;
 import mz.mzlib.minecraft.item.ItemStack;
 import mz.mzlib.minecraft.recipe.Ingredient;
 import mz.mzlib.minecraft.recipe.IngredientVanilla;
@@ -27,11 +26,6 @@ public interface RecipeCraftingShaped extends RecipeCrafting
     int getWidth();
     int getHeight();
     List<? extends Option<? extends Ingredient>> getIngredients();
-
-    @VersionRange(begin = 1200)
-    Option<String> getGroupV1200();
-
-
 
     static Builder builder()
     {

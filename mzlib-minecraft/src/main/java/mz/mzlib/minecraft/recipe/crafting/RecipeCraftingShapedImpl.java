@@ -53,6 +53,7 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
     @PropAccessor("ingredients")
     void setIngredients(List<? extends Option<? extends Ingredient>> value);
 
+    @Override
     @PropAccessor("group")
     Option<String> getGroup();
     @PropAccessor("group")
@@ -210,11 +211,6 @@ public interface RecipeCraftingShapedImpl extends RecipeCraftingAbstract, Recipe
     @WrapConstructor
     RecipeCraftingShapedImpl static$of();
 
-    @Override
-    default Option<String> getGroupV1200()
-    {
-        return this.getGroup();
-    }
     @Override
     default Option<String> getGroupV1700()
     {

@@ -25,6 +25,7 @@ import mz.mzlib.minecraft.wrapper.WrapMinecraftClass;
 import mz.mzlib.minecraft.wrapper.WrapMinecraftMethod;
 import mz.mzlib.util.FunctionInvertible;
 import mz.mzlib.util.Option;
+import mz.mzlib.util.ThrowablePredicate;
 import mz.mzlib.util.proxy.ListProxy;
 import mz.mzlib.util.wrapper.SpecificImpl;
 import mz.mzlib.util.wrapper.WrapMethod;
@@ -73,6 +74,12 @@ public interface RecipeMojang extends WrapperObject, RecipeVanilla
         }
     )
     Identifier getIdV1300_2002();
+
+    @Override
+    default Option<?> getGroup()
+    {
+        return RecipeVanilla.super.getGroup();
+    }
 
 
     @SpecificImpl("getType")
@@ -257,6 +264,12 @@ public interface RecipeMojang extends WrapperObject, RecipeVanilla
     @WrapMinecraftMethod(@VersionName(name = "showNotification"))
     boolean isNotificationEnabledV1904();
 
+    @SpecificImpl("getGroup")
+    @VersionRange(begin = 1700)
+    default Option<String> getGroup$implV1700()
+    {
+        return Option.some(this.getGroup0V1700()).filter(ThrowablePredicate.of(String::isEmpty).negate());
+    }
     /**
      * Usually client only: V1200
      */

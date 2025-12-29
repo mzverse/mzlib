@@ -1,5 +1,7 @@
 package mz.mzlib.util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import mz.mzlib.util.wrapper.WrapperObject;
 
 import java.util.Iterator;
@@ -11,7 +13,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-// TODO Refactor
+// TODO Refactor to final class
+@Nonnull
 public abstract class Option<T> implements Iterable<T>
 {
     public static <T> Option<T> some(T value)
@@ -23,7 +26,7 @@ public abstract class Option<T> implements Iterable<T>
         return RuntimeUtil.cast(None.instance);
     }
 
-    public static <T> Option<T> fromNullable(T value)
+    public static <T> Option<T> fromNullable(@Nullable T value)
     {
         if(value == null)
             return none();
@@ -31,6 +34,7 @@ public abstract class Option<T> implements Iterable<T>
             return some(value);
     }
 
+    @Nullable
     public abstract T toNullable();
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -55,8 +59,10 @@ public abstract class Option<T> implements Iterable<T>
 
     public abstract boolean isNone();
 
+    @Nonnull
     public abstract T unwrap();
 
+    @Nonnull
     public <E extends Throwable> T unwrap(Supplier<E> supplier) throws E
     {
         return this.unwrapOrGet(() -> RuntimeUtil.valueThrow(supplier.get()));
@@ -151,6 +157,7 @@ public abstract class Option<T> implements Iterable<T>
         }
 
 
+        @Nonnull
         @Override
         public T unwrap()
         {
@@ -201,7 +208,7 @@ public abstract class Option<T> implements Iterable<T>
         @Override
         public int hashCode()
         {
-            return Objects.hash(0, this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -215,6 +222,7 @@ public abstract class Option<T> implements Iterable<T>
         }
 
         @Override
+        @Nonnull
         public Iterator<T> iterator()
         {
             return new Itr();
@@ -269,6 +277,7 @@ public abstract class Option<T> implements Iterable<T>
             return Optional.empty();
         }
 
+        @Nonnull
         @Override
         public T unwrap()
         {
@@ -325,6 +334,7 @@ public abstract class Option<T> implements Iterable<T>
         }
 
         @Override
+        @Nonnull
         public Iterator<T> iterator()
         {
             return new Itr();

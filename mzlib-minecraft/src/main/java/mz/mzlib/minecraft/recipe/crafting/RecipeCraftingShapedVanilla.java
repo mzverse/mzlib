@@ -81,8 +81,13 @@ public interface RecipeCraftingShapedVanilla extends RecipeMojang, RecipeCraftin
     }
 
     @Override
+    default Option<?> getGroup()
+    {
+        return RecipeCraftingShaped.super.getGroup();
+    }
+    @SpecificImpl("getGroup")
     @VersionRange(begin = 1200)
-    default Option<String> getGroupV1200()
+    default Option<String> getGroup$implV1200()
     {
         return Option.some(this.getGroup0V1200()).filter(ThrowablePredicate.of(String::isEmpty).negate());
     }
