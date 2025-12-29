@@ -7,14 +7,11 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MapConcurrentWeakHash<K, V> extends AbstractMap<K, V>
 {
-    ConcurrentHashMap<RefWeak<K>, V> delegate = new ConcurrentHashMap<>();
-    WeakHashMap<WeakReference<K>, RefWeak<K>> keyMap = new WeakHashMap<>();
+    ConcurrentHashMap<Key<K>, V> delegate = new ConcurrentHashMap<>();
     ReferenceQueue<K> referenceQueue = new ReferenceQueue<>();
-    Queue<WeakReference<K>> cleanQueue = new ConcurrentLinkedQueue<>();
 
     public MapConcurrentWeakHash()
     {
@@ -36,7 +33,7 @@ public class MapConcurrentWeakHash<K, V> extends AbstractMap<K, V>
     @Override
     public boolean containsKey(Object key)
     {
-        return this.delegate.containsKey(new RefWeak<>(key));
+        return this.delegate.containsKey(new Key<>(key));
     }
 
     @Override
@@ -48,52 +45,43 @@ public class MapConcurrentWeakHash<K, V> extends AbstractMap<K, V>
     @Override
     public V get(Object key)
     {
-        this.autoClean();
-        return this.delegate.get(new RefWeak<>(key));
+        this.clean();
+        return this.delegate.get(new Key<>(key));
     }
 
     @Override
     public V put(K key, V value)
     {
-        this.autoClean();
-        RefWeak<K> k = new RefWeak<>(key, this.referenceQueue);
-        V last = this.delegate.put(k, value);
-        if(last == null)
-            synchronized(this)
-            {
-                this.keyMap.put(k.getDelegate(), k);
-            }
-        return last;
+        this.clean();
+        return this.delegate.put(new Key<>(key, this.referenceQueue), value);
     }
 
     @Override
     public V remove(Object key)
     {
-        this.autoClean();
-        return this.delegate.remove(new RefWeak<>(key));
+        this.clean();
+        return this.delegate.remove(new Key<>(key));
     }
     @Override
     public boolean remove(Object key, Object value)
     {
-        this.autoClean();
-        return this.delegate.remove(new RefWeak<>(key), value);
+        this.clean();
+        return this.delegate.remove(new Key<>(key), value);
     }
 
     @Override
     public synchronized void clear()
     {
         this.delegate.clear();
-        this.keyMap.clear();
         while(this.referenceQueue.poll() != null)
             RuntimeUtil.nop();
-        this.cleanQueue.clear();
     }
 
     @Override
     @Nonnull
     public Collection<V> values()
     {
-        this.autoClean();
+        this.clean();
         return this.delegate.values();
     }
 
@@ -176,9 +164,9 @@ public class MapConcurrentWeakHash<K, V> extends AbstractMap<K, V>
 
     class Entry implements Map.Entry<K, V>
     {
-        Map.Entry<RefWeak<K>, V> delegate;
+        Map.Entry<Key<K>, V> delegate;
         K key;
-        public Entry(Map.Entry<RefWeak<K>, V> delegate, K key)
+        public Entry(Map.Entry<Key<K>, V> delegate, K key)
         {
             this.delegate = delegate;
             this.key = key;
@@ -235,7 +223,7 @@ public class MapConcurrentWeakHash<K, V> extends AbstractMap<K, V>
     }
     abstract class IteratorBase<T> implements Iterator<T>
     {
-        Iterator<Map.Entry<RefWeak<K>, V>> delegate = MapConcurrentWeakHash.this.delegate.entrySet().iterator();
+        Iterator<Map.Entry<Key<K>, V>> delegate = MapConcurrentWeakHash.this.delegate.entrySet().iterator();
         K last;
         Entry next;
         @Override
@@ -245,7 +233,7 @@ public class MapConcurrentWeakHash<K, V> extends AbstractMap<K, V>
                 return true;
             while(this.delegate.hasNext())
             {
-                Map.Entry<RefWeak<K>, V> entry = this.delegate.next();
+                Map.Entry<Key<K>, V> entry = this.delegate.next();
                 K key = entry.getKey().get();
                 if(key == null)
                 {
@@ -275,33 +263,44 @@ public class MapConcurrentWeakHash<K, V> extends AbstractMap<K, V>
         }
     }
 
-    void autoClean()
-    {
-        this.clean1();
-        if(cleanQueue.size() > 5)
-            this.clean2();
-    }
     void clean()
-    {
-        this.clean1();
-        this.clean2();
-    }
-    void clean1()
     {
         Reference<? extends K> ref;
         while((ref = this.referenceQueue.poll()) != null)
         {
-            this.cleanQueue.offer(RuntimeUtil.cast(ref));
+            assert ref instanceof Key;
+            this.delegate.remove(ref);
         }
     }
-    synchronized void clean2()
+
+    static class Key<T> extends WeakReference<T>
     {
-        Reference<? extends K> ref;
-        while((ref = this.cleanQueue.poll()) != null)
+        final int hashCode;
+        public Key(T referent)
         {
-            RefWeak<K> key = this.keyMap.remove(ref);
-            if(key != null)
-                this.delegate.remove(key);
+            super(referent);
+            this.hashCode = System.identityHashCode(referent);
+        }
+        public Key(T referent, ReferenceQueue<T> q)
+        {
+            super(referent, q);
+            this.hashCode = System.identityHashCode(referent);
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return this.hashCode;
+        }
+        @Override
+        public boolean equals(Object obj)
+        {
+            if(this == obj)
+                return true;
+            if(!(obj instanceof Key))
+                return false;
+            Key<?> that = (Key<?>) obj;
+            return this.get() == that.get();
         }
     }
 }

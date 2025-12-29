@@ -10,7 +10,7 @@ import mz.mzlib.minecraft.window.Window;
 import mz.mzlib.minecraft.window.WindowType;
 import mz.mzlib.module.MzModule;
 
-public abstract class UiWindowAnvil extends UiWindow
+public abstract class UiWindowAnvil extends UiWindow // FIXME: V_1100
 {
     public UiWindowAnvil(Inventory inventory)
     {

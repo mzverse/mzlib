@@ -13,6 +13,9 @@ import java.util.stream.Stream;
 
 public interface Ingredient extends Predicate<ItemStack>
 {
+    @Override
+    boolean test(ItemStack itemStack);
+
     default Collection<ItemStack> getExamples()
     {
         return Collections.emptyList();

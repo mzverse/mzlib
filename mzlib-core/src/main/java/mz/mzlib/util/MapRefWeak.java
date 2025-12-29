@@ -6,6 +6,9 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+/**
+ * @see MapConcurrentWeakHash
+ */
 @Deprecated
 public class MapRefWeak<K, V> extends AbstractMap<K, V>
 {
