@@ -1,11 +1,15 @@
 package mz.mzlib.minecraft;
 
+import jakarta.annotation.Nonnull;
 import mz.mzlib.minecraft.wrapper.WrapMinecraftClass;
 import mz.mzlib.minecraft.wrapper.WrapMinecraftFieldAccessor;
-import mz.mzlib.util.wrapper.*;
+import mz.mzlib.util.wrapper.SpecificImpl;
+import mz.mzlib.util.wrapper.WrapConstructor;
+import mz.mzlib.util.wrapper.WrapperFactory;
+import mz.mzlib.util.wrapper.WrapperObject;
 
 @WrapMinecraftClass(@VersionName(name = "net.minecraft.util.Identifier"))
-public interface Identifier extends WrapperObject
+public interface Identifier extends WrapperObject, Comparable<Identifier>
 {
     WrapperFactory<Identifier> FACTORY = WrapperFactory.of(Identifier.class);
 
@@ -42,6 +46,17 @@ public interface Identifier extends WrapperObject
         return this.getName() + delimiter + this.getName();
     }
 
+    @Override
+    default int compareTo(@Nonnull Identifier o)
+    {
+        int result = Boolean.compare(o.isMinecraft(), this.isMinecraft());
+        if(result != 0)
+            return result;
+        result = this.getNamespace().compareTo(o.getNamespace());
+        if(result != 0)
+            return result;
+        return this.getName().compareTo(o.getName());
+    }
 
     Identifier static$of(String namespace, String name);
     @SpecificImpl("static$of")

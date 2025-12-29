@@ -30,9 +30,7 @@ public class Pair<F, S> implements Comparable<Pair<F, S>>
     {
         int resultFirst = RuntimeUtil.<Comparable<F>>cast(first).compareTo(o.first);
         if(resultFirst != 0)
-        {
             return resultFirst;
-        }
         return RuntimeUtil.<Comparable<S>>cast(second).compareTo(o.second);
     }
 
