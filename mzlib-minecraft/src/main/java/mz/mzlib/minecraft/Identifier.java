@@ -43,7 +43,7 @@ public interface Identifier extends WrapperObject, Comparable<Identifier>
 
     default String join(char delimiter)
     {
-        return this.getName() + delimiter + this.getName();
+        return this.getNamespace() + delimiter + this.getName();
     }
 
     @Override

@@ -33,10 +33,7 @@ import mz.mzlib.util.Option;
 import mz.mzlib.util.Result;
 import mz.mzlib.util.wrapper.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @WrapMinecraftClass(@VersionName(name = "net.minecraft.item.ItemStack"))
 public interface ItemStack extends WrapperObject
@@ -109,17 +106,26 @@ public interface ItemStack extends WrapperObject
         StepLore lore();
         default Builder i18n(String lang, String key)
         {
-            this.customName(MinecraftI18n.resolveText(lang, key));
-            key += ".lore";
-            if(I18n.getSource(lang, key, null) != null)
-                this.lore()
-                    .lines(MinecraftI18n.resolveTexts(lang, key))
-                    .finish();
-            return this;
+            return this.i18n(lang, key, Collections.emptyList());
         }
         default Builder i18n(EntityPlayer player, String key)
         {
-            return this.i18n(player.getLanguage(), key);
+            return this.i18n(player, key, Collections.emptyList());
+        }
+        default Builder i18n(String lang, String key, Object args)
+        {
+            if(I18n.getSource(lang, key, null) != null)
+                this.customName(MinecraftI18n.resolveText(lang, key, args));
+            key += ".lore";
+            if(I18n.getSource(lang, key, null) != null)
+                this.lore()
+                    .lines(MinecraftI18n.resolveTexts(lang, key, args))
+                    .finish();
+            return this;
+        }
+        default Builder i18n(EntityPlayer player, String key, Object args)
+        {
+            return this.i18n(player.getLanguage(), key, args);
         }
 
         interface StepLore
@@ -130,6 +136,7 @@ public interface ItemStack extends WrapperObject
             {
                 return this.lines(Arrays.asList(values));
             }
+            StepLore clear();
             Builder finish();
             default ItemStack build()
             {

@@ -246,6 +246,12 @@ class ItemStackBuilderImpl implements ItemStack.Builder
             return this;
         }
         @Override
+        public ItemStack.Builder.StepLore clear()
+        {
+            this.lines.clear();
+            return this;
+        }
+        @Override
         public ItemStackBuilderImpl finish()
         {
             return this.base.data(Item.LORE, Option.some(this.lines));
