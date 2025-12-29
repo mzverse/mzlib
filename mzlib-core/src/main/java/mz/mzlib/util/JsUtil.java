@@ -53,19 +53,16 @@ public class JsUtil
         return new NativeJavaFunction(function);
     }
 
-    static Cache<String, Script> cache = Cache.<String, Script>builder().weakRef(true).defaultSupplier(key ->
-    {
-        try(Context context = Settings.def.enterContext())
-        {
-            context.setOptimizationLevel(9);
-            return context.compileString(key, "js", 1, null);
-        }
-    }).build();
+    static Cache<String, Script> cache = Cache.<String, Script>builder().weakRef(true).build();
     public static Object eval(Settings settings, Object scope, String script)
     {
         try(Context context = settings.enterContext())
         {
-            return cache.get(script).exec(context, (Scriptable) scope);
+            return cache.get(script, ()->
+            {
+                context.setOptimizationLevel(9);
+                return context.compileString(script, "js", 1, null);
+            }).exec(context, (Scriptable) scope);
         }
         catch(Throwable e)
         {
