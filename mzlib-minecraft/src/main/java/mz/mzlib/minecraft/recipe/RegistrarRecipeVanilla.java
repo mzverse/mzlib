@@ -49,18 +49,29 @@ public abstract class RegistrarRecipeVanilla implements IRegistrar<RecipeRegistr
             return RegistrarRecipeVanilla.this.isRegistrable(object.getType());
         }
 
-        Map<RecipeType, Map<Identifier, RecipeDisabling>> disablings = new HashMap<>();
+        Map<RecipeType, Map<Identifier, Set<RecipeDisabling>>> disablings = new HashMap<>();
 
         @Override
         public void register(MzModule module, RecipeDisabling object)
         {
-            this.disablings.computeIfAbsent(object.type, k -> new HashMap<>()).put(object.id, object);
+            Set<RecipeDisabling> set = this.disablings.computeIfAbsent(object.type, k -> new HashMap<>()).computeIfAbsent(object.id, k -> new HashSet<>());
+            for(Recipe recipe : Option.fromOptional(set.stream().findAny()).flatMap(RecipeDisabling::getRecipe))
+                object.setRecipe(recipe);
+            set.add(object);
             RegistrarRecipeVanilla.this.markDirty();
         }
         @Override
         public void unregister(MzModule module, RecipeDisabling object)
         {
-            this.disablings.get(object.type).remove(object.id);
+            this.disablings.computeIfPresent(object.type, (type, map) ->
+            {
+                map.computeIfPresent(object.id, (id, set) ->
+                {
+                    set.remove(object);
+                    return set.isEmpty() ? null : set;
+                });
+                return map.isEmpty() ? null : map;
+            });
             RegistrarRecipeVanilla.this.markDirty();
         }
     }
@@ -74,7 +85,7 @@ public abstract class RegistrarRecipeVanilla implements IRegistrar<RecipeRegistr
         return this.enabledRecipes;
     }
 
-    public Map<RecipeType, Map<Identifier, RecipeDisabling>> getDisablings()
+    public Map<RecipeType, Map<Identifier, Set<RecipeDisabling>>> getDisablings()
     {
         return this.registrarDisabling.disablings;
     }
@@ -114,12 +125,14 @@ public abstract class RegistrarRecipeVanilla implements IRegistrar<RecipeRegistr
             for(Iterator<Map.Entry<Identifier, Recipe>> i = entry.getValue().entrySet().iterator(); i.hasNext(); )
             {
                 Map.Entry<Identifier, Recipe> e = i.next();
-                for(RecipeDisabling disabling : Option.fromNullable(
-                    this.registrarDisabling.disablings.getOrDefault(entry.getKey(), Collections.emptyMap()).get(e.getKey())))
+                boolean flag = false;
+                for(RecipeDisabling disabling : this.registrarDisabling.disablings.getOrDefault(entry.getKey(), Collections.emptyMap()).getOrDefault(e.getKey(), Collections.emptySet()))
                 {
                     disabling.setRecipe(e.getValue());
-                    i.remove();
+                    flag = true;
                 }
+                if(flag)
+                    i.remove();
             }
         }
         for(Map.Entry<RecipeType, Map<Identifier, Recipe>> e : enabledRecipes.entrySet())
