@@ -2,6 +2,7 @@ package mz.mzlib.util;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import mz.mzlib.util.wrapper.WrapperFactory;
 import mz.mzlib.util.wrapper.WrapperObject;
 
 import java.util.Iterator;
@@ -112,6 +113,10 @@ public abstract class Option<T> implements Iterable<T>
     public <U> Option<U> filter(Class<U> type)
     {
         return this.filter(type::isInstance).map(RuntimeUtil::cast);
+    }
+    public <U extends WrapperObject> Option<U> filter(WrapperFactory<U> type)
+    {
+        return this.filter(WrapperObject.class).filter(type::isInstance).map(RuntimeUtil::cast);
     }
 
     public Stream<T> stream()

@@ -37,6 +37,11 @@ public class WrapperFactory<T extends WrapperObject>
         return this.getStatic().static$isInstance(wrapper);
     }
 
+    public T cast(WrapperObject wrapper)
+    {
+        return wrapper.as(this);
+    }
+
     public static <T extends WrapperObject> WrapperFactory<T> of(Class<T> wrapperClass)
     {
         //noinspection deprecation
