@@ -226,11 +226,12 @@ class ItemStackBuilderImpl implements ItemStack.Builder
                 this.lines = lore.map(ArrayList::new).unwrapOrGet(ArrayList::new);
                 return;
             }
-            for(List<Text> lore : Item.LORE.get(base.from))
-            {
-                this.lines = new ArrayList<>(lore);
-                return;
-            }
+            if(base.from != null)
+                for(List<Text> lore : Item.LORE.get(base.from))
+                {
+                    this.lines = new ArrayList<>(lore);
+                    return;
+                }
             lines = new ArrayList<>();
         }
         @Override
