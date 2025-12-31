@@ -156,6 +156,8 @@ public interface WindowSlotButton extends WindowSlot
 
 此为服务端特性导致，我们暂未修复
 
+高版本似乎是Paper修复的此问题，Fabric中仍保持原状。待验证
+
 == action
 
 自1.21.5起：

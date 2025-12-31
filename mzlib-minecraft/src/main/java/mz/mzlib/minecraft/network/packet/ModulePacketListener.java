@@ -141,6 +141,8 @@ public class ModulePacketListener extends MzModule
         }, locateMethod = "channelRead0BeginLocate", type = NothingInjectType.INSERT_BEFORE)
         default Wrapper_void channelRead0Begin(@LocalVar(2) Packet packet)
         {
+            if(this.getReceivingDirection().equals(PacketDirection.S2C))
+                return Nothing.notReturn();
             if(rehandling.get() == Boolean.TRUE)
             {
                 rehandling.set(false);
@@ -169,6 +171,8 @@ public class ModulePacketListener extends MzModule
             @LocalVar(1) Packet packet,
             @LocalVar(2) GenericFutureListener<?>[] callbacksV1901)
         {
+            if(this.getReceivingDirection().equals(PacketDirection.S2C))
+                return Nothing.notReturn();
             if(rehandling.get() == Boolean.TRUE)
             {
                 rehandling.set(false);
@@ -195,6 +199,8 @@ public class ModulePacketListener extends MzModule
             @LocalVar(1) Packet packet,
             @LocalVar(2) GenericFutureListener<?> callbacksV1901)
         {
+            if(this.getReceivingDirection().equals(PacketDirection.S2C))
+                return Nothing.notReturn();
             if(rehandling.get() == Boolean.TRUE)
             {
                 rehandling.set(false);
@@ -221,6 +227,8 @@ public class ModulePacketListener extends MzModule
             @LocalVar(1) Packet packet,
             @LocalVar(2) PacketCallbacksV1901 callbacksV1901)
         {
+            if(this.getReceivingDirection().equals(PacketDirection.S2C))
+                return Nothing.notReturn();
             if(rehandling.get() == Boolean.TRUE)
             {
                 rehandling.set(false);
@@ -249,6 +257,8 @@ public class ModulePacketListener extends MzModule
             @LocalVar(2) PacketCallbacksV1901 callbacksV1901,
             @LocalVar(3) boolean flush)
         {
+            if(this.getReceivingDirection().equals(PacketDirection.S2C))
+                return Nothing.notReturn();
             if(rehandling.get() == Boolean.TRUE)
             {
                 rehandling.set(false);
@@ -277,6 +287,8 @@ public class ModulePacketListener extends MzModule
             @LocalVar(2) ChannelFutureListener callbacksV1901,
             @LocalVar(3) boolean flush)
         {
+            if(this.getReceivingDirection().equals(PacketDirection.S2C))
+                return Nothing.notReturn();
             if(rehandling.get() == Boolean.TRUE)
             {
                 rehandling.set(false);

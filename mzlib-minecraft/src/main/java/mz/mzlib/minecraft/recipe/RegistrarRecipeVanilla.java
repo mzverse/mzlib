@@ -147,7 +147,7 @@ public abstract class RegistrarRecipeVanilla implements IRegistrar<RecipeRegistr
     protected void onReloadEnd()
     {
         this.updateOriginal();
-        this.flush();
+        this.flush(); // FIXME: 换成markDirty()可以解决部分问题但仍不符合预期
     }
 
     @Override

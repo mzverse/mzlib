@@ -60,12 +60,19 @@ public class ServerModule implements Registrable
             this.register(new EventListener<>(
                 EventServerStop.class, event ->
             {
-                this.unregister(event.server);
                 for(Map.Entry<ServerModule, MzModule> entry : CollectionUtil.reverse(moduleParents.entrySet().stream())
                     .collect(Collectors.toList()))
                 {
-                    entry.getValue().unregister(entry.getKey().module);
+                    try
+                    {
+                        entry.getValue().unregister(entry.getKey().module);
+                    }
+                    catch(Throwable e)
+                    {
+                        e.printStackTrace(System.err);
+                    }
                 }
+                this.unregister(event.server);
             }
             ));
         }

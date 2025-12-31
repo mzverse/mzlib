@@ -109,9 +109,12 @@ public class EventPlayerUseItem extends EventPlayer implements Cancellable
     {
         default boolean handleBegin(
             WrapperObject.Generic<EventPlayerUseItem> event,
+            World world,
             EntityPlayerAbstract player,
             Hand hand)
         {
+            if(world.isClient())
+                return true;
             event.setWrapped(new EventPlayerUseItem(player.as(EntityPlayer.FACTORY), hand, this));
             event.getWrapped().call();
             if(event.getWrapped().isCancelled())
@@ -133,9 +136,10 @@ public class EventPlayerUseItem extends EventPlayer implements Cancellable
         }, locateMethod = "", type = NothingInjectType.INSERT_BEFORE)
         default ItemStack useV_900$begin(
             @CustomVar("eventUse") WrapperObject.Generic<EventPlayerUseItem> event,
+            @LocalVar(1) World world,
             @LocalVar(2) EntityPlayerAbstract player)
         {
-            if(handleBegin(event, player, Hand.mainHand()))
+            if(handleBegin(event, world, player, Hand.mainHand()))
                 return Nothing.notReturn();
             return resultV_900(event.getWrapped());
         }
@@ -148,6 +152,8 @@ public class EventPlayerUseItem extends EventPlayer implements Cancellable
             @CustomVar("eventUse") WrapperObject.Generic<EventPlayerUseItem> event,
             @StackTop ItemStack returnValue)
         {
+            if(!event.isPresent())
+                return Nothing.notReturn();
             event.getWrapped().setResult(ActionResult.pass());
             event.getWrapped().setResultItemStack(returnValue);
             event.getWrapped().finish();
@@ -167,10 +173,11 @@ public class EventPlayerUseItem extends EventPlayer implements Cancellable
         }, locateMethod = "", type = NothingInjectType.INSERT_BEFORE)
         default TypedActionResultV900_2102<?> use0V900_2102$begin(
             @CustomVar("eventUse") WrapperObject.Generic<EventPlayerUseItem> event,
+            @LocalVar(1) World world,
             @LocalVar(2) EntityPlayerAbstract player,
             @LocalVar(3) Hand hand)
         {
-            if(handleBegin(event, player, hand))
+            if(handleBegin(event, world, player, hand))
                 return Nothing.notReturn();
             return resultV900_2102(event.getWrapped());
         }
@@ -184,6 +191,8 @@ public class EventPlayerUseItem extends EventPlayer implements Cancellable
             @CustomVar("eventUse") WrapperObject.Generic<EventPlayerUseItem> event,
             @StackTop TypedActionResultV900_2102<?> returnValue)
         {
+            if(!event.isPresent())
+                return Nothing.notReturn();
             event.getWrapped().setResult(returnValue.getActionResult());
             event.getWrapped().setResultItemStack(
                 new TypedActionResultV900_2102.Wrapper<>(returnValue, ItemStack.FACTORY).getValue());
@@ -206,10 +215,11 @@ public class EventPlayerUseItem extends EventPlayer implements Cancellable
         }, locateMethod = "", type = NothingInjectType.INSERT_BEFORE)
         default ActionResult useV2102$begin(
             @CustomVar("eventUse") WrapperObject.Generic<EventPlayerUseItem> event,
+            @LocalVar(1) World world,
             @LocalVar(2) EntityPlayerAbstract player,
             @LocalVar(3) Hand hand)
         {
-            if(handleBegin(event, player, hand))
+            if(handleBegin(event, world, player, hand))
                 return Nothing.notReturn();
             return resultV2102(event.getWrapped());
         }
@@ -223,6 +233,8 @@ public class EventPlayerUseItem extends EventPlayer implements Cancellable
             @CustomVar("eventUse") WrapperObject.Generic<EventPlayerUseItem> event,
             @StackTop ActionResult returnValue)
         {
+            if(!event.isPresent())
+                return Nothing.notReturn();
             event.getWrapped().setResult(returnValue);
             if(returnValue.is(ActionResult.SuccessV2102.FACTORY))
                 event.getWrapped()
