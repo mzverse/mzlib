@@ -40,4 +40,12 @@ dependencies {
     compileOnly("com.mojang:datafixerupper:4.0.26")
 }
 
+tasks.shadowJar {
+    manifest {
+        attributes(
+            "Main-Class" to "mz.mzlib.minecraft.vanilla.MzLibMinecraftInitializer",
+        )
+    }
+}
+
 ext["publishing"] = true

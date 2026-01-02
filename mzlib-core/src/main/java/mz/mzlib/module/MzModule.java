@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public abstract class MzModule
+public class MzModule
 {
     public Set<MzModule> submodules = new HashSet<>();
     public Map<Object, Stack<IRegistrar<?>>> registeredObjects = new LinkedHashMap<>();
