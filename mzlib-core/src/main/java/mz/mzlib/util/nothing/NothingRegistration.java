@@ -160,7 +160,7 @@ public class NothingRegistration
                     Executable m;
                     try
                     {
-                        if(ni.wrapperMethodName().equals("<init>")) // FIXME
+                        if(ni.wrapperMethodName().equals("<init>"))
                             m = WrapperClassInfo.get(RuntimeUtil.cast(nothing)).getWrappedClass()
                                 .getConstructor(WrapperClassInfo.toUnwrappedClasses(ni.wrapperMethodParams()));
                         else

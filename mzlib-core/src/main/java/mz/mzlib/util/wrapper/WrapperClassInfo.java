@@ -446,7 +446,7 @@ public class WrapperClassInfo
                             ), false
                             ), i.getValue().getDeclaringClass().getName(), Type.getMethodType(
                                 AsmUtil.getDesc(
-                                    ((Method) i.getValue()).getReturnType(),
+                                    ((Method) i.getValue()).getReturnType(), // FIXME
                                     i.getKey().getParameterTypes()
                                 )), Modifier.isStatic(i.getValue().getModifiers()) ? 1 : 0
                         );

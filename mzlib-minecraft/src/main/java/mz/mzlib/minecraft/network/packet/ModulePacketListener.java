@@ -12,7 +12,6 @@ import mz.mzlib.minecraft.network.ClientConnection;
 import mz.mzlib.minecraft.network.packet.s2c.PacketBundleS2cV1904;
 import mz.mzlib.module.MzModule;
 import mz.mzlib.util.Option;
-import mz.mzlib.util.RuntimeUtil;
 import mz.mzlib.util.TaskList;
 import mz.mzlib.util.asm.AsmUtil;
 import mz.mzlib.util.nothing.*;
@@ -46,9 +45,8 @@ public class ModulePacketListener extends MzModule
                 List<Packet> newPackets = new ArrayList<>();
                 TaskList synced = new TaskList();
                 Iterable<Packet> packets = packet.castTo(PacketBundleV1904.FACTORY).getPackets();
-                packet.setWrappedFrom(packet.isInstanceOf(PacketBundleS2cV1904.FACTORY) ?
-                    PacketBundleS2cV1904.newInstance(newPackets) :
-                    RuntimeUtil.valueThrow(new UnsupportedOperationException()));
+                if(!packet.isInstanceOf(PacketBundleS2cV1904.FACTORY))
+                    throw  new UnsupportedOperationException();
                 for(Iterator<Packet> i = packets.iterator(); i.hasNext(); )
                 {
                     Packet p = i.next();
@@ -65,11 +63,15 @@ public class ModulePacketListener extends MzModule
                                 if(this.handle(channel, player, p1, newPackets::add, Runnable::run))
                                     newPackets.add(p1);
                             }
-                            rehandler.accept(packet);
+                            if(!newPackets.isEmpty())
+                                rehandler.accept(PacketBundleS2cV1904.newInstance(newPackets));
                         });
                         return false;
                     }
                 }
+                if(newPackets.isEmpty())
+                    return false;
+                packet.setWrappedFrom(PacketBundleS2cV1904.newInstance(newPackets));
                 return true;
             }
 

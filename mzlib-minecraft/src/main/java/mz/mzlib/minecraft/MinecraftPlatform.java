@@ -55,6 +55,7 @@ public interface MinecraftPlatform extends Instance
     class Tag
     {
         public static final String FABRIC = "fabric";
+        public static final String NEOFORGE = "neoforge";
         public static final String BUKKIT = "bukkit";
         public static final String PAPER = "paper";
         public static final String FOLIA = "folia";
