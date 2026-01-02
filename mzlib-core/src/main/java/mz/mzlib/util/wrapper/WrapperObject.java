@@ -2,15 +2,14 @@ package mz.mzlib.util.wrapper;
 
 import mz.mzlib.asm.tree.FieldInsnNode;
 import mz.mzlib.asm.tree.MethodInsnNode;
+import mz.mzlib.util.ClassUtil;
 import mz.mzlib.util.Option;
 import mz.mzlib.util.RuntimeUtil;
 import mz.mzlib.util.asm.AsmUtil;
 import mz.mzlib.util.compound.ICompoundImpl;
 
 import java.lang.invoke.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
+import java.lang.reflect.*;
 import java.util.function.Function;
 
 @WrapClass(Object.class)
@@ -203,6 +202,56 @@ public interface WrapperObject
             opcode, AsmUtil.getType(target.getDeclaringClass()),
             target instanceof Constructor ? "<init>" : target.getName(), AsmUtil.getDesc(target), isInterface
         );
+    }
+
+    final class Bsm
+    {
+        private Bsm()
+        {
+        }
+
+        public static CallSite fromWrapper(
+            MethodHandles.Lookup caller,
+            String wrapperMethodName,
+            MethodType invokedType,
+            Class<? extends WrapperObject> wrapperClass,
+            MethodType wrapperMethodType) throws NoSuchMethodException, NoSuchFieldException
+        {
+            Member member = WrapperClassInfo.get(wrapperClass).getWrappedMembers()
+                .get(wrapperClass.getMethod(wrapperMethodName, wrapperMethodType.parameterArray()));
+            MethodHandle result;
+            if(member instanceof Method)
+            {
+                Method method = (Method) member;
+                result = ClassUtil.findMethod(
+                    method.getDeclaringClass(), Modifier.isStatic(method.getModifiers()), method.getName(),
+                    method.getReturnType(), method.getParameterTypes()
+                );
+            }
+            else if(member instanceof Constructor)
+            {
+                Constructor<?> constructor = (Constructor<?>) member;
+                result = ClassUtil.findConstructor(constructor.getDeclaringClass(), constructor.getParameterTypes());
+            }
+            else if(member instanceof Field)
+            {
+                Field field = (Field) member;
+                switch(wrapperMethodType.parameterCount())
+                {
+                    case 0:
+                        result = ClassUtil.findFieldGetter(field.getDeclaringClass(), Modifier.isStatic(field.getModifiers()), field.getName(), field.getType());
+                        break;
+                    case 1:
+                        result = ClassUtil.findFieldSetter(field.getDeclaringClass(), Modifier.isStatic(field.getModifiers()), field.getName(), field.getType());
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("Unsupported field accessor type: " + wrapperMethodType);
+                }
+            }
+            else
+                throw new UnsupportedOperationException("Unsupported member: " + member);
+            return new ConstantCallSite(result.asType(invokedType));
+        }
     }
 
     @WrapSameClass(WrapperObject.class)

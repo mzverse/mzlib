@@ -191,10 +191,17 @@ public class ClassUtil
     }
 
     public static MethodHandle findConstructor(Class<?> declaringClass, Class<?>... parameterTypes)
-        throws NoSuchMethodException, IllegalAccessException
+        throws NoSuchMethodException
     {
-        return Root.getTrusted(declaringClass)
-            .findConstructor(declaringClass, MethodType.methodType(void.class, parameterTypes));
+        try
+        {
+            return Root.getTrusted(declaringClass)
+                .findConstructor(declaringClass, MethodType.methodType(void.class, parameterTypes));
+        }
+        catch(IllegalAccessException e)
+        {
+            throw new AssertionError(e);
+        }
     }
 
     public static MethodHandle findMethod(
@@ -202,17 +209,20 @@ public class ClassUtil
         boolean isStatic,
         String name,
         Class<?> returnType,
-        Class<?>... parameterTypes) throws NoSuchMethodException, IllegalAccessException
+        Class<?>... parameterTypes) throws NoSuchMethodException
     {
-        if(isStatic)
+        try
         {
-            return Root.getTrusted(declaringClass)
-                .findStatic(declaringClass, name, MethodType.methodType(returnType, parameterTypes));
+            if(isStatic)
+                return Root.getTrusted(declaringClass)
+                    .findStatic(declaringClass, name, MethodType.methodType(returnType, parameterTypes));
+            else
+                return Root.getTrusted(declaringClass)
+                    .findVirtual(declaringClass, name, MethodType.methodType(returnType, parameterTypes));
         }
-        else
+        catch(IllegalAccessException e)
         {
-            return Root.getTrusted(declaringClass)
-                .findVirtual(declaringClass, name, MethodType.methodType(returnType, parameterTypes));
+            throw new AssertionError(e);
         }
     }
 
@@ -220,22 +230,32 @@ public class ClassUtil
         Class<?> declaringClass,
         String name,
         Class<?> returnType,
-        Class<?>... parameterTypes) throws NoSuchMethodException, IllegalAccessException
+        Class<?>... parameterTypes) throws NoSuchMethodException
     {
-        return Root.getTrusted(declaringClass)
-            .findSpecial(declaringClass, name, MethodType.methodType(returnType, parameterTypes), declaringClass);
+        try
+        {
+            return Root.getTrusted(declaringClass)
+                .findSpecial(declaringClass, name, MethodType.methodType(returnType, parameterTypes), declaringClass);
+        }
+        catch(IllegalAccessException e)
+        {
+            throw new AssertionError(e);
+        }
     }
 
     public static MethodHandle findFieldGetter(Class<?> declaringClass, boolean isStatic, String name, Class<?> type)
-        throws NoSuchFieldException, IllegalAccessException
+        throws NoSuchFieldException
     {
-        if(isStatic)
+        try
         {
-            return Root.getTrusted(declaringClass).findStaticGetter(declaringClass, name, type);
+            if(isStatic)
+                return Root.getTrusted(declaringClass).findStaticGetter(declaringClass, name, type);
+            else
+                return Root.getTrusted(declaringClass).findGetter(declaringClass, name, type);
         }
-        else
+        catch(IllegalAccessException e)
         {
-            return Root.getTrusted(declaringClass).findGetter(declaringClass, name, type);
+            throw new AssertionError(e);
         }
     }
     public static MethodHandle findFieldGetter(Class<?> declaringClass, boolean isStatic, String name)
@@ -245,15 +265,22 @@ public class ClassUtil
     }
 
     public static MethodHandle findFieldSetter(Class<?> declaringClass, boolean isStatic, String name, Class<?> type)
-        throws NoSuchFieldException, IllegalAccessException
+        throws NoSuchFieldException
     {
-        if(isStatic)
+        try
         {
-            return Root.getTrusted(declaringClass).findStaticSetter(declaringClass, name, type);
+            if(isStatic)
+            {
+                return Root.getTrusted(declaringClass).findStaticSetter(declaringClass, name, type);
+            }
+            else
+            {
+                return Root.getTrusted(declaringClass).findSetter(declaringClass, name, type);
+            }
         }
-        else
+        catch(IllegalAccessException e)
         {
-            return Root.getTrusted(declaringClass).findSetter(declaringClass, name, type);
+            throw new AssertionError(e);
         }
     }
     public static MethodHandle findFieldSetter(Class<?> declaringClass, boolean isStatic, String name)
