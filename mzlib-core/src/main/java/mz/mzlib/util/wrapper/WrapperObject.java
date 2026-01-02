@@ -250,7 +250,7 @@ public interface WrapperObject
             }
             else
                 throw new UnsupportedOperationException("Unsupported member: " + member);
-            return new ConstantCallSite(result.asType(invokedType));
+            return new ConstantCallSite(result.asFixedArity().asType(invokedType));
         }
     }
 

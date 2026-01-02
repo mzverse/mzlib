@@ -386,6 +386,7 @@ public class WrapperClassInfo
                         accessible = accessible && this.hasAccessTo(j);
                     }
                     accessible = accessible && this.hasAccessTo(rt);
+                    rt = ClassUtil.baseType(rt);
                     if(accessible)
                     {
                         if(!Modifier.isStatic(i.getValue().getModifiers()))
