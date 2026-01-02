@@ -174,10 +174,10 @@ public interface WrapperObject
             return true;
         if(!(object instanceof WrapperObject))
             return false;
-        return this.equals((WrapperObject) object);
+        return this.equals$impl((WrapperObject) object);
     }
     @WrapMethod("equals")
-    boolean equals(WrapperObject object);
+    boolean equals$impl(WrapperObject object);
     @WrapMethod("clone")
     WrapperObject clone();
 

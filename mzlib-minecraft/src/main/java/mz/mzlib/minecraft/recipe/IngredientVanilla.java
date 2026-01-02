@@ -366,7 +366,6 @@ public interface IngredientVanilla extends WrapperObject, Ingredient
     @Override
     boolean equals(Object object);
 
-
     @SpecificImpl("hashCode")
     @VersionRange(end = 1200)
     default int hashCodeV_1200()
