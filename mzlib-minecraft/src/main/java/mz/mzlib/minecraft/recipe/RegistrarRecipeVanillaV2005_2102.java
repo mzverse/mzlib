@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import mz.mzlib.minecraft.Identifier;
 import mz.mzlib.minecraft.VersionRange;
 import mz.mzlib.util.CollectionUtil;
+import mz.mzlib.util.ThrowableFunction;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class RegistrarRecipeVanillaV2005_2102 extends RegistrarRecipeVanilla
             .collect(Collectors.toMap(
                 entry -> RecipeTypeV1400.FACTORY.create(entry.getKey()),
                 entry -> entry.getValue().stream().map(RecipeEntryV2002.FACTORY::create)
-                    .collect(Collectors.toMap(RecipeEntryV2002::getId, RecipeEntryV2002::getValue))
+                    .collect(Collectors.toMap(RecipeEntryV2002::getId, ThrowableFunction.of(RecipeEntryV2002::getValue).thenApply(RecipeMojang::autoCast)))
             ));
     }
 
