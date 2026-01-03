@@ -40,12 +40,12 @@ public class RegistrarCommandBrigadierV1300 implements IRegistrar<Command>
                 .register(RuntimeUtil.cast(LiteralArgumentBuilder.literal(name).executes(context ->
                 {
                     command.execute(
-                        CommandSource.create(context.getSource()), context.getRange().get(context.getInput()), null);
+                        CommandSource.FACTORY.create(context.getSource()), context.getRange().get(context.getInput()), null);
                     return 1;
                 }).then(RequiredArgumentBuilder.argument("args", StringArgumentType.greedyString()).executes(context ->
                 {
                     command.execute(
-                        CommandSource.create(context.getSource()),
+                        CommandSource.FACTORY.create(context.getSource()),
                         context.getNodes().get(0).getRange().get(context.getInput()),
                         context.getNodes().get(1).getRange().get(context.getInput())
                     );
@@ -60,7 +60,7 @@ public class RegistrarCommandBrigadierV1300 implements IRegistrar<Command>
                     String input = context.getInput().substring(start);
                     b = b.createOffset(start + input.lastIndexOf(' ') + 1);
                     String[] argv2 = input.split(" ", 2);
-                    for(String s : command.suggest(CommandSource.create(context.getSource()), argv2[0], argv2[1]))
+                    for(String s : command.suggest(CommandSource.FACTORY.create(context.getSource()), argv2[0], argv2[1]))
                     {
                         b.suggest(s, null);
                     }
@@ -74,16 +74,16 @@ public class RegistrarCommandBrigadierV1300 implements IRegistrar<Command>
     public void unregister(MzModule module, Command command)
     {
         if(command.namespace != null)
-            CommandDispatcherV1300.create(CommandManager.instance.getDispatcherV1300().getWrapped()).getRoot()
+            CommandDispatcherV1300.FACTORY.create(CommandManager.instance.getDispatcherV1300().getWrapped()).getRoot()
                 .removeChild(command.namespace + ":" + command.name);
-        CommandDispatcherV1300.create(CommandManager.instance.getDispatcherV1300().getWrapped()).getRoot()
+        CommandDispatcherV1300.FACTORY.create(CommandManager.instance.getDispatcherV1300().getWrapped()).getRoot()
             .removeChild(command.name);
         for(String alias : command.aliases)
         {
-            CommandDispatcherV1300.create(CommandManager.instance.getDispatcherV1300().getWrapped()).getRoot()
+            CommandDispatcherV1300.FACTORY.create(CommandManager.instance.getDispatcherV1300().getWrapped()).getRoot()
                 .removeChild(alias);
             if(command.namespace != null)
-                CommandDispatcherV1300.create(CommandManager.instance.getDispatcherV1300().getWrapped()).getRoot()
+                CommandDispatcherV1300.FACTORY.create(CommandManager.instance.getDispatcherV1300().getWrapped()).getRoot()
                     .removeChild(command.namespace + ":" + alias);
         }
         CommandManager.instance.updateAllV1300();

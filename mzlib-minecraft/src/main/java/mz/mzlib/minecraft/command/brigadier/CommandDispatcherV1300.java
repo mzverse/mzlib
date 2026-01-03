@@ -9,12 +9,6 @@ import mz.mzlib.util.wrapper.*;
 public interface CommandDispatcherV1300 extends WrapperObject
 {
     WrapperFactory<CommandDispatcherV1300> FACTORY = WrapperFactory.of(CommandDispatcherV1300.class);
-    @Deprecated
-    @WrapperCreator
-    static CommandDispatcherV1300 create(Object wrapped)
-    {
-        return WrapperObject.create(CommandDispatcherV1300.class, wrapped);
-    }
 
     @Override
     CommandDispatcher<?> getWrapped();

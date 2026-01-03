@@ -47,6 +47,6 @@ public interface CommandOutput extends WrapperObject
     @VersionRange(begin = 1600, end = 1900)
     default void sendMessageV1600_1900(Text msg)
     {
-        sendMessageV1600_1900(msg, null);
+        sendMessageV1600_1900(msg, new UUID(0L, 0L));
     }
 }

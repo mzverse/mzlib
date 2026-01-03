@@ -10,7 +10,6 @@ import mz.mzlib.minecraft.wrapper.WrapMinecraftFieldAccessor;
 import mz.mzlib.minecraft.wrapper.WrapMinecraftMethod;
 import mz.mzlib.util.Option;
 import mz.mzlib.util.wrapper.SpecificImpl;
-import mz.mzlib.util.wrapper.WrapperCreator;
 import mz.mzlib.util.wrapper.WrapperFactory;
 import mz.mzlib.util.wrapper.WrapperObject;
 
@@ -22,12 +21,6 @@ import mz.mzlib.util.wrapper.WrapperObject;
 public interface CommandSource extends WrapperObject
 {
     WrapperFactory<CommandSource> FACTORY = WrapperFactory.of(CommandSource.class);
-    @Deprecated
-    @WrapperCreator
-    static CommandSource create(Object wrapped)
-    {
-        return WrapperObject.create(CommandSource.class, wrapped);
-    }
 
     boolean isSilent();
 
