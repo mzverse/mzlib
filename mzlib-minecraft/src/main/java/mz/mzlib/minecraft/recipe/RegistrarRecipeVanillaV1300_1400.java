@@ -2,7 +2,6 @@ package mz.mzlib.minecraft.recipe;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import mz.mzlib.minecraft.Identifier;
-import mz.mzlib.minecraft.MinecraftServer;
 import mz.mzlib.minecraft.VersionRange;
 import mz.mzlib.util.CollectionUtil;
 
@@ -19,9 +18,8 @@ public class RegistrarRecipeVanillaV1300_1400 extends RegistrarRecipeVanilla
     Map<Object, Object> rawRecipes0;
 
     @Override
-    protected void updateOriginal()
+    protected void updateOriginal(RecipeManager recipeManager)
     {
-        RecipeManager recipeManager = MinecraftServer.instance.getRecipeManagerV1300();
         this.rawRecipes0 = recipeManager.getRecipes0V1300_1400();
         Map<RecipeType, Map<Identifier, Recipe>> result = new HashMap<>();
         for(Map.Entry<Identifier, RecipeMojang> e : recipeManager.getRecipesV1300_1400().entrySet())
@@ -38,15 +36,15 @@ public class RegistrarRecipeVanillaV1300_1400 extends RegistrarRecipeVanilla
     }
 
     @Override
-    public synchronized void flush()
+    public synchronized void flush(RecipeManager recipeManager)
     {
-        super.flush();
+        super.flush(recipeManager);
         Map<Object, Object> result = new Object2ObjectLinkedOpenHashMap<>(); // adapt for Bukkit
         for(Map.Entry<Identifier, Recipe> entry : CollectionUtil.asIterable(
             this.getEnabledRecipes().values().stream().map(Map::entrySet).flatMap(Set::stream).iterator()))
         {
             result.put(entry.getKey().getWrapped(), ((RecipeMojang) entry.getValue()).getWrapped());
         }
-        MinecraftServer.instance.getRecipeManagerV1300().setRecipes0V1300_1400(result);
+        recipeManager.setRecipes0V1300_1400(result);
     }
 }

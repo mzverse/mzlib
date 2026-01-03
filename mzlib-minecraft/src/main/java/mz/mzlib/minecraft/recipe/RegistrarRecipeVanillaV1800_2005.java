@@ -1,9 +1,9 @@
 package mz.mzlib.minecraft.recipe;
 
 import mz.mzlib.minecraft.Identifier;
-import mz.mzlib.minecraft.MinecraftServer;
 import mz.mzlib.minecraft.VersionRange;
 import mz.mzlib.util.CollectionUtil;
+import mz.mzlib.util.RuntimeUtil;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,15 +16,15 @@ public class RegistrarRecipeVanillaV1800_2005 extends RegistrarRecipeVanillaV140
     public static RegistrarRecipeVanillaV1800_2005 instance;
 
     @Override
-    public synchronized void flush()
+    public synchronized void flush(RecipeManager manager)
     {
-        super.flush();
+        super.flush(manager);
         Map<Object, Object> result = new HashMap<>();
-        for(Map.Entry<Identifier, Recipe> entry : CollectionUtil.asIterable(
-            this.getEnabledRecipes().values().stream().map(Map::entrySet).flatMap(Set::stream).iterator()))
+        for(Map.Entry<Identifier, RecipeMojang> entry : CollectionUtil.asIterable(
+            RuntimeUtil.<Map<RecipeType, Map<Identifier, RecipeMojang>>>cast(this.getEnabledRecipes()).values().stream().map(Map::entrySet).flatMap(Set::stream).iterator()))
         {
             result.put(entry.getKey().getWrapped(), toData.apply(RecipeRegistration.of(entry.getKey(), entry.getValue())).getWrapped());
         }
-        MinecraftServer.instance.getRecipeManagerV1300().setIdRecipes0V1800_2102(Collections.unmodifiableMap(result));
+        manager.setIdRecipes0V1800_2102(Collections.unmodifiableMap(result));
     }
 }

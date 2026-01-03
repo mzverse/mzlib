@@ -17,7 +17,7 @@ public abstract class RegistrarRecipeVanillaV_1300 extends RegistrarRecipeVanill
     public static RegistrarRecipeVanillaV_1300 instance;
 
     @Override
-    protected void updateOriginal()
+    protected void updateOriginal(RecipeManager manager)
     {
         this.updateOriginal(SmeltingManagerV_1300.getInstance());
     }
@@ -47,9 +47,9 @@ public abstract class RegistrarRecipeVanillaV_1300 extends RegistrarRecipeVanill
     }
 
     @Override
-    public synchronized void flush()
+    public synchronized void flush(RecipeManager manager)
     {
-        super.flush();
+        super.flush(manager);
         Map<Object, Object> results0 = new HashMap<>();
         Map<Object, Float> experiences0 = new HashMap<>();
         for(RecipeFurnaceV_1300 recipe : RuntimeUtil.<Collection<RecipeFurnaceV_1300>>cast(

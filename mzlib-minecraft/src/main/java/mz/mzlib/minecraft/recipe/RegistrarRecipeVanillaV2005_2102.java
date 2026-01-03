@@ -2,7 +2,6 @@ package mz.mzlib.minecraft.recipe;
 
 import com.google.common.collect.ImmutableMultimap;
 import mz.mzlib.minecraft.Identifier;
-import mz.mzlib.minecraft.MinecraftServer;
 import mz.mzlib.minecraft.VersionRange;
 import mz.mzlib.util.CollectionUtil;
 
@@ -18,10 +17,9 @@ public class RegistrarRecipeVanillaV2005_2102 extends RegistrarRecipeVanilla
     public static RegistrarRecipeVanillaV2005_2102 instance;
 
     @Override
-    protected void updateOriginal()
+    protected void updateOriginal(RecipeManager manager)
     {
-        RecipeManager recipeManager = MinecraftServer.instance.getRecipeManagerV1300();
-        this.originalRecipes = recipeManager.getTypeRecipes0V2005_2102().asMap().entrySet().stream()
+        this.originalRecipes = manager.getTypeRecipes0V2005_2102().asMap().entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> RecipeTypeV1400.FACTORY.create(entry.getKey()),
                 entry -> entry.getValue().stream().map(RecipeEntryV2002.FACTORY::create)
@@ -30,10 +28,9 @@ public class RegistrarRecipeVanillaV2005_2102 extends RegistrarRecipeVanilla
     }
 
     @Override
-    public synchronized void flush()
+    public synchronized void flush(RecipeManager manager)
     {
-        super.flush();
-        RecipeManager recipeManager = MinecraftServer.instance.getRecipeManagerV1300();
+        super.flush(manager);
         Map<Object, Object> result = new HashMap<>();
         for(Map.Entry<Identifier, Recipe> entry : CollectionUtil.asIterable(
             this.getEnabledRecipes().values().stream().map(Map::entrySet).flatMap(Set::stream).iterator()))
@@ -43,7 +40,7 @@ public class RegistrarRecipeVanillaV2005_2102 extends RegistrarRecipeVanilla
                 RecipeEntryV2002.of(RecipeRegistration.of(entry.getKey(), (RecipeMojang) entry.getValue())).getWrapped()
             );
         }
-        recipeManager.setIdRecipes0V1800_2102(Collections.unmodifiableMap(result));
+        manager.setIdRecipes0V1800_2102(Collections.unmodifiableMap(result));
 
         ImmutableMultimap.Builder<Object, Object> builder = ImmutableMultimap.builder();
         for(Map.Entry<RecipeType, Map<Identifier, Recipe>> entry : this.getEnabledRecipes().entrySet())
@@ -56,6 +53,6 @@ public class RegistrarRecipeVanillaV2005_2102 extends RegistrarRecipeVanilla
                 );
             }
         }
-        recipeManager.setTypeRecipes0V2005_2102(builder.build());
+        manager.setTypeRecipes0V2005_2102(builder.build());
     }
 }

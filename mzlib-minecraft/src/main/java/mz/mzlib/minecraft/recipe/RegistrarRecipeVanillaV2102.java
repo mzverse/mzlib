@@ -13,10 +13,10 @@ public class RegistrarRecipeVanillaV2102 extends RegistrarRecipeVanilla
     public static RegistrarRecipeVanillaV2102 instance;
 
     @Override
-    protected void updateOriginal()
+    protected void updateOriginal(RecipeManager manager)
     {
         Map<RecipeType, Map<Identifier, Recipe>> result = new HashMap<>();
-        for(RecipeEntryV2002 recipe : MinecraftServer.instance.getRecipeManagerV1300().getPreparedRecipesV2102()
+        for(RecipeEntryV2002 recipe : manager.getPreparedRecipesV2102()
             .recipes())
         {
             RecipeMojang r = recipe.getValue().autoCast();
@@ -31,17 +31,16 @@ public class RegistrarRecipeVanillaV2102 extends RegistrarRecipeVanilla
     }
 
     @Override
-    public synchronized void flush()
+    public synchronized void flush(RecipeManager manager)
     {
-        super.flush();
-        RecipeManager recipeManager = MinecraftServer.instance.getRecipeManagerV1300();
+        super.flush(manager);
         List<RecipeEntryV2002> result = new ArrayList<>();
         for(Map.Entry<Identifier, Recipe> entry : CollectionUtil.asIterable(
             this.getEnabledRecipes().values().stream().map(Map::entrySet).flatMap(Set::stream).iterator()))
         {
             result.add(RecipeEntryV2002.of(RecipeRegistration.of(entry.getKey(), (RecipeMojang) entry.getValue())));
         }
-        recipeManager.setPreparedRecipesV2102(PreparedRecipesV2102.of(result));
-        recipeManager.initializeV2102(MinecraftServer.instance.getSavePropertiesV1600().getEnabledFeaturesV1903());
+        manager.setPreparedRecipesV2102(PreparedRecipesV2102.of(result));
+        manager.initializeV2102(MinecraftServer.instance.getSavePropertiesV1600().getEnabledFeaturesV1903());
     }
 }

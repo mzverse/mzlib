@@ -14,9 +14,9 @@ public class RegistrarRecipeVanillaV1200_1300 extends RegistrarRecipeVanillaV_13
     public static RegistrarRecipeVanillaV1200_1300 instance;
 
     @Override
-    protected void updateOriginal()
+    protected void updateOriginal(RecipeManager manager)
     {
-        super.updateOriginal();
+        super.updateOriginal(manager);
         Map<RecipeType, Map<Identifier, Recipe>> result = new HashMap<>(this.originalRecipes);
         HashMap<Identifier, Recipe> craftingRecipes = new HashMap<>();
         RegistrySimple<?> registry = RecipeManager.getRegistryV1200_1300();
@@ -29,9 +29,9 @@ public class RegistrarRecipeVanillaV1200_1300 extends RegistrarRecipeVanillaV_13
     }
 
     @Override
-    public synchronized void flush()
+    public synchronized void flush(RecipeManager manager)
     {
-        super.flush();
+        super.flush(manager);
         RecipeManager.setRegistryV1200_1300(RegistrySimple.ofV_1600()); // FIXME: 原始顺序（raw id）是重要的，对于配方书
         for(Map.Entry<Identifier, Recipe> e : this.getEnabledRecipes()
             .getOrDefault(RecipeType.CRAFTING, Collections.emptyMap()).entrySet())

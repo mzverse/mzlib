@@ -93,7 +93,7 @@ public abstract class RegistrarRecipeVanilla implements IRegistrar<RecipeRegistr
     public Map<RecipeType, Map<Identifier, Recipe>> getOriginalRecipes()
     {
         if(this.originalRecipes == null)
-            this.updateOriginal();
+            this.updateOriginal(RecipeManager.getInstance());
         return this.originalRecipes;
     }
 
@@ -104,10 +104,10 @@ public abstract class RegistrarRecipeVanilla implements IRegistrar<RecipeRegistr
         if(this.isDirty)
             return;
         this.isDirty = true;
-        MinecraftServer.instance.schedule(this::flush);
+        MinecraftServer.instance.schedule(() -> this.flush(RecipeManager.getInstance()));
     }
 
-    public synchronized void flush()
+    public synchronized void flush(RecipeManager manager)
     {
         this.isDirty = false;
         Map<RecipeType, Map<Identifier, Recipe>> enabledRecipes = new HashMap<>(this.getOriginalRecipes());
@@ -142,12 +142,12 @@ public abstract class RegistrarRecipeVanilla implements IRegistrar<RecipeRegistr
         this.enabledRecipes = Collections.unmodifiableMap(enabledRecipes);
     }
 
-    protected abstract void updateOriginal();
+    protected abstract void updateOriginal(RecipeManager manager);
 
-    protected void onReloadEnd()
+    protected void onReloadEnd(RecipeManager manager)
     {
-        this.updateOriginal();
-        this.flush(); // FIXME: 换成markDirty()可以解决部分问题但仍不符合预期
+        this.updateOriginal(manager);
+        this.flush(manager);
     }
 
     @Override

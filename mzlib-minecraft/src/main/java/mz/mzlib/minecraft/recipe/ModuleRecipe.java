@@ -123,7 +123,7 @@ public class ModuleRecipe extends MzModule
         )
         default void reload$end()
         {
-            RegistrarRecipeVanilla.instance.onReloadEnd();
+            RegistrarRecipeVanilla.instance.onReloadEnd(this);
         }
     }
     @VersionRange(begin = 1400)
@@ -143,7 +143,7 @@ public class ModuleRecipe extends MzModule
         )
         default void apply$impl$end()
         {
-            RegistrarRecipeVanilla.instance.onReloadEnd();
+            RegistrarRecipeVanilla.instance.onReloadEnd(this);
         }
     }
 }

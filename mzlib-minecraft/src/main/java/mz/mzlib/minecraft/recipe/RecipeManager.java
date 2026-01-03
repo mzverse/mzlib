@@ -2,6 +2,7 @@ package mz.mzlib.minecraft.recipe;
 
 import com.google.common.collect.Multimap;
 import mz.mzlib.minecraft.Identifier;
+import mz.mzlib.minecraft.MinecraftServer;
 import mz.mzlib.minecraft.VersionName;
 import mz.mzlib.minecraft.VersionRange;
 import mz.mzlib.minecraft.incomprehensible.resource.FeatureSetV1903;
@@ -12,6 +13,7 @@ import mz.mzlib.minecraft.wrapper.WrapMinecraftMethod;
 import mz.mzlib.util.FunctionInvertible;
 import mz.mzlib.util.proxy.ListProxy;
 import mz.mzlib.util.proxy.MapProxy;
+import mz.mzlib.util.wrapper.SpecificImpl;
 import mz.mzlib.util.wrapper.WrapConstructor;
 import mz.mzlib.util.wrapper.WrapperFactory;
 import mz.mzlib.util.wrapper.WrapperObject;
@@ -27,6 +29,32 @@ import java.util.Map;
 public interface RecipeManager extends WrapperObject
 {
     WrapperFactory<RecipeManager> FACTORY = WrapperFactory.of(RecipeManager.class);
+
+    static RecipeManager getInstance()
+    {
+        return FACTORY.getStatic().static$getInstance();
+    }
+
+
+    RecipeManager static$getInstance();
+    @SpecificImpl("static$getInstance")
+    @VersionRange(end = 1200)
+    default RecipeManager static$getInstance$implV_1200()
+    {
+        return getInstanceV_1200();
+    }
+    @SpecificImpl("static$getInstance")
+    @VersionRange(begin = 1200, end = 1300)
+    default RecipeManager static$getInstance$implV1200_1300()
+    {
+        return FACTORY.getStatic();
+    }
+    @SpecificImpl("static$getInstance")
+    @VersionRange(begin = 1300)
+    default RecipeManager static$getInstance$implV1300()
+    {
+        return MinecraftServer.instance.getRecipeManagerV1300();
+    }
 
     @VersionRange(end = 1200)
     static RecipeManager ofV_1200()

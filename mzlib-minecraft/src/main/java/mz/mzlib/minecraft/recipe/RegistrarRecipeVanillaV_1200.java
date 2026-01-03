@@ -12,22 +12,18 @@ public class RegistrarRecipeVanillaV_1200 extends RegistrarRecipeVanillaV_1300
     public static RegistrarRecipeVanillaV_1200 instance;
 
     @Override
-    protected void onReloadEnd()
+    protected void onReloadEnd(RecipeManager manager)
     {
     }
 
     @Override
-    protected void updateOriginal()
+    protected void updateOriginal(RecipeManager manager)
     {
-        super.updateOriginal();
-        this.updateOriginal(RecipeManager.getInstanceV_1200());
-    }
-    protected void updateOriginal(RecipeManager recipeManager)
-    {
+        super.updateOriginal(manager);
         HashMap<RecipeType, Map<Identifier, Recipe>> result =
             this.originalRecipes == null ? new HashMap<>() : new HashMap<>(this.originalRecipes);
         HashMap<Identifier, Recipe> craftingRecipes = new HashMap<>();
-        for(RecipeMojang recipe : recipeManager.getRecipesV_1200())
+        for(RecipeMojang recipe : manager.getRecipesV_1200())
         {
             recipe = recipe.autoCast();
             Recipe last = craftingRecipes.put(recipe.calcIdV_1200(), recipe);
@@ -39,14 +35,14 @@ public class RegistrarRecipeVanillaV_1200 extends RegistrarRecipeVanillaV_1300
     }
 
     @Override
-    public synchronized void flush()
+    public synchronized void flush(RecipeManager manager)
     {
-        super.flush();
+        super.flush(manager);
         List<Object> recipes0 = new ArrayList<>();
         for(Recipe recipe : this.getEnabledRecipes().getOrDefault(RecipeType.CRAFTING, Collections.emptyMap()).values())
         {
             recipes0.add(((RecipeMojang)recipe).getWrapped());
         }
-        RecipeManager.getInstanceV_1200().setRecipes0V_1200(recipes0);
+        manager.setRecipes0V_1200(recipes0);
     }
 }
