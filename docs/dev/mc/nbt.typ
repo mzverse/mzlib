@@ -128,26 +128,266 @@
 
 / #[= 保存到文件]:
 
-    使用`NbtIo`类
+    使用`NbtIo`类进行NBT数据的文件读写操作
+
+    == 写入文件
 
     将一个`NbtElement`存入文件，*原则上它必须是`NbtCompound`*
 
     ```java
-    NbtIo.write(nbt, dataOutput);
+    // 创建NBT数据
+    NbtCompound nbt = NbtCompound.newInstance();
+    nbt.put("playerName", "Steve");
+    nbt.put("score", 100);
+    nbt.put("isOnline", true);
+
+    // 写入文件
+    try(FileOutputStream fos = new FileOutputStream("data.dat");
+        DataOutputStream dos = new DataOutputStream(fos))
+    {
+        NbtIo.write(nbt, dos);
+    }
+    catch(IOException e)
+    {
+        e.printStackTrace();
+    }
     ```
 
-    读取时使用`NbtSizeTracker`限制其大小，`NbtSizeTracker.newInstance()`是默认最大限度
+    == 读取文件
+
+    读取时使用`NbtSizeTracker`限制其大小，防止恶意的大文件攻击
+
     ```java
-    NbtElement nbt = NbtIo.read(dataInput, NbtSizeTracker.newInstance());
+    try(FileInputStream fis = new FileInputStream("data.dat");
+        DataInputStream dis = new DataInputStream(fis))
+    {
+        // 使用默认大小限制
+        NbtElement nbt = NbtIo.read(dis, NbtSizeTracker.newInstance());
+        
+        // 使用自定义大小限制（单位：字节）
+        NbtElement nbtLimited = NbtIo.read(dis, NbtSizeTracker.newInstance(1024 * 1024)); // 1MB限制
+        
+        if(nbt.is(NbtCompound.FACTORY))
+        {
+            NbtCompound compound = nbt.as(NbtCompound.FACTORY);
+            String playerName = compound.getString("name").unwrap();
+            int score = compound.getInt("score").unwrap();
+        }
+    }
+    catch(IOException e)
+    {
+        e.printStackTrace();
+    }
     ```
 
-    / #[== 压缩保存]:
+    == 压缩保存
 
-        推荐使用默认的压缩格式保存：*仅支持`NbtCompound`*
+    推荐使用默认的压缩格式保存：*仅支持`NbtCompound`*
 
-        ```java
-        NbtIo.writeCompoundCompressed(nbt, stream);
-        ```
-        ```java
-        NbtCompound nbt = NbtIo.readCompoundCompressed(stream);
-        ```
+    === 写入压缩文件
+
+    ```java
+    NbtCompound nbt = NbtCompound.newInstance();
+    nbt.put("version", 1);
+    nbt.put("data", "Hello World");
+
+    // 写入GZIP压缩文件
+    try(FileOutputStream fos = new FileOutputStream("data.nbt");
+        GZIPOutputStream gzos = new GZIPOutputStream(fos))
+    {
+        NbtIo.writeCompoundCompressed(nbt, gzos);
+    }
+    catch(IOException e)
+    {
+        e.printStackTrace();
+    }
+    ```
+
+    === 读取压缩文件
+
+    ```java
+    try(FileInputStream fis = new FileInputStream("data.nbt");
+        GZIPInputStream gzis = new GZIPInputStream(fis))
+    {
+        NbtCompound nbt = NbtIo.readCompoundCompressed(gzis);
+        
+        // 读取数据
+        int version = nbt.getInt("version").unwrap();
+        String data = nbt.getString("data").unwrap();
+    }
+    catch(IOException e)
+    {
+        e.printStackTrace();
+    }
+    ```
+
+    == 实用示例
+
+    === 保存玩家数据
+
+    ```java
+    public void savePlayerData(EntityPlayer player, File file)
+    {
+        NbtCompound nbt = NbtCompound.newInstance();
+        
+        // 保存基本信息
+        nbt.put("name", player.getName());
+        nbt.put("uuid", player.getUuid().toString());
+        
+        // 保存位置
+        NbtCompound pos = NbtCompound.newInstance();
+        pos.put("x", player.getX());
+        pos.put("y", player.getY());
+        pos.put("z", player.getZ());
+        nbt.put("position", pos);
+        
+        // 保存物品栏
+        NbtList inventory = NbtList.newInstance();
+        for(int i = 0; i < player.getInventory().getSize(); i++)
+        {
+            ItemStack item = player.getInventory().getItemStack(i);
+            if(!item.isEmpty())
+            {
+                // 将物品编码为NBT
+                for(NbtCompound itemNbt : item.encode().getValue())
+                {
+                    inventory.add(itemNbt);
+                }
+            }
+        }
+        nbt.put("inventory", inventory);
+        
+        // 写入文件
+        try(FileOutputStream fos = new FileOutputStream(file);
+            GZIPOutputStream gzos = new GZIPOutputStream(fos))
+        {
+            NbtIo.writeCompoundCompressed(nbt, gzos);
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    ```
+
+    === 加载玩家数据
+
+    ```java
+    public void loadPlayerData(EntityPlayer player, File file)
+    {
+        if(!file.exists())
+            return;
+        
+        try(FileInputStream fis = new FileInputStream(file);
+            GZIPInputStream gzis = new GZIPInputStream(fis))
+        {
+            NbtCompound nbt = NbtIo.readCompoundCompressed(gzis);
+            
+            // 验证玩家UUID
+            String savedUuid = nbt.getString("uuid").unwrap();
+            if(!savedUuid.equals(player.getUuid().toString()))
+            {
+                System.err.println("UUID mismatch!");
+                return;
+            }
+            
+            // 恢复位置
+            for(NbtCompound pos : nbt.getNbtCompound("position"))
+            {
+                double x = pos.getDouble("x").unwrap();
+                double y = pos.getDouble("y").unwrap();
+                double z = pos.getDouble("z").unwrap();
+                player.teleport(x, y, z);
+            }
+            
+            // 恢复物品栏
+            for(NbtList inventory : nbt.getNbtList("inventory"))
+            {
+                for(int i = 0; i < inventory.size() && i < player.getInventory().getSize(); i++)
+                {
+                    NbtCompound itemNbt = inventory.get(i).as(NbtCompound.FACTORY);
+                    ItemStack item = ItemStack.decode(itemNbt).getValue().unwrap();
+                    player.getInventory().setItemStack(i, item);
+                }
+            }
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    ```
+
+    === 配置文件读写
+
+    ```java
+    public class Config
+    {
+        private NbtCompound data;
+        private File file;
+        
+        public Config(File file)
+        {
+            this.file = file;
+            this.data = NbtCompound.newInstance();
+            load();
+        }
+        
+        public void load()
+        {
+            if(file.exists())
+            {
+                try(FileInputStream fis = new FileInputStream(file);
+                    GZIPInputStream gzis = new GZIPInputStream(fis))
+                {
+                    this.data = NbtIo.readCompoundCompressed(gzis);
+                }
+                catch(IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        public void save()
+        {
+            try(FileOutputStream fos = new FileOutputStream(file);
+                GZIPOutputStream gzos = new GZIPOutputStream(fos))
+            {
+                NbtIo.writeCompoundCompressed(data, gzos);
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        
+        public String get(String key, String defaultValue)
+        {
+            return data.getString(key).unwrapOr(defaultValue);
+        }
+        
+        public void set(String key, String value)
+        {
+            data.put(key, value);
+        }
+        
+        public int getInt(String key, int defaultValue)
+        {
+            return data.getInt(key).unwrapOr(defaultValue);
+        }
+        
+        public void setInt(String key, int value)
+        {
+            data.put(key, value);
+        }
+    }
+    ```
+
+    #cardTip[
+      使用GZIP压缩可以显著减少文件大小，特别是对于包含大量文本数据的NBT文件
+    ]
+
+    #cardAttention[
+      始终使用`NbtSizeTracker`来限制读取的NBT数据大小，防止恶意大文件导致内存溢出
+    ]

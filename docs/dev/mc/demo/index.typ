@@ -1,11 +1,6 @@
-#import "../../../lib/lib.typ": *;
-
-#set raw(lang: "java");
-
-#let title = [示例];
-
+#import "/lib/lib.typ": *;
+#let title = [Demo];
 #show: template.with(title: title);
-
 
 
 demo

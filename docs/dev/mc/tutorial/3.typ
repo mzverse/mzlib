@@ -1,8 +1,6 @@
-#import "../../../lib/lib.typ": *
-
-#let title = [3.创建简单命令]
-
-#show: template.with(title: title)
+#import "/lib/lib.typ": *;
+#let title = [3.创建简单命令];
+#show: template.with(title: title);
 
 
 

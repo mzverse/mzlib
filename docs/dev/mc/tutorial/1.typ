@@ -1,8 +1,6 @@
-#import "../../../lib/lib.typ": *
-
-#let title = [1.基本结构与约定]
-
-#show: template.with(title: title)
+#import "/lib/lib.typ": *;
+#let title = [1.基本结构与约定];
+#show: template.with(title: title);
 
 
 

@@ -160,6 +160,7 @@
     #show repeat: [...]; // TODO
     #show grid: c=>c.children.sum(); // TODO
     #show grid.cell: c=>c.body; // TODO
+    #show math.equation: html_frame
     #importStyle("style.css", "lib/");
     #con;
 ];

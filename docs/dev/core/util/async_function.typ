@@ -1,7 +1,7 @@
-#import "/lib/lib.typ": *
-#let title = [异步函数]
-#show: template.with(title: title)
-#set raw(lang: "java")
+#import "/lib/lib.typ": *;
+#set raw(lang: "java");
+#let title = [异步函数];
+#show: template.with(title: title);
 
 也许你常有这样的烦恼（实则不然）：你需要在主线程上处理一些事物，但是其中你想进行一些延迟，显然你不能睡在主线程上
 

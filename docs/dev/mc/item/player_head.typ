@@ -1,8 +1,7 @@
-#import "../../../lib/lib.typ": *
-
-#let title = [玩家头颅与玩家档案描述]
-
-#show: template.with(title: title)
+#import "/lib/lib.typ": *;
+#set raw(lang: "java");
+#let title = `PlayerHead`;
+#show: template.with(title: title);
 
 
 

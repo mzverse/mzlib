@@ -1,8 +1,6 @@
-#import "../../../lib/lib.typ": *
-
-#let title = [4.监听事件]
-
-#show: template.with(title: title)
+#import "/lib/lib.typ": *;
+#let title = [4.监听事件];
+#show: template.with(title: title);
 
 
 

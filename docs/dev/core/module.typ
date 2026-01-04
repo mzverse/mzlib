@@ -1,6 +1,4 @@
-#import "/lib/lib.typ": *
-#let title = [模块与注册];
-#set raw(lang: "java");
+#import "/lib/lib.typ": *;
+#let title = [模块];
 #show: template.with(title: title);
-
 // TODO

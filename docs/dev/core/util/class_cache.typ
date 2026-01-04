@@ -1,9 +1,6 @@
-#import "../../../lib/lib.typ": *;
-
+#import "/lib/lib.typ": *;
 #set raw(lang: "java");
-
 #let title = `ClassCache`;
-
 #show: template.with(title: title);
 
 
@@ -38,3 +35,77 @@ System.gc(); // gc后能正确释放缓存
 ```
 
 详见测试`mz.mzlib.util.TestClassCache`
+
+= 实际应用示例
+
+== 缓存反射方法
+
+```java
+public class ReflectionCache
+{
+    // 缓存getter方法
+    private static final ClassCache<Class<?>, Map<String, Method>> getterCache = new ClassCache<>(
+        clazz ->
+        {
+            Map<String, Method> getters = new HashMap<>();
+            for(Method method : clazz.getMethods())
+            {
+                String name = method.getName();
+                if(name.startsWith("get") && method.getParameterCount() == 0)
+                {
+                    String propertyName = name.substring(3);
+                    propertyName = Character.toLowerCase(propertyName.charAt(0)) + propertyName.substring(1);
+                    getters.put(propertyName, method);
+                }
+            }
+            return getters;
+        }
+    );
+
+    public static Method getGetter(Class<?> clazz, String propertyName)
+    {
+        Map<String, Method> getters = getterCache.get(clazz);
+        return getters.get(propertyName);
+    }
+}
+```
+
+== 缓存字段
+
+```java
+public class FieldCache
+{
+    private static final ClassCache<Class<?>, Map<String, Field>> fieldCache = new ClassCache<>(
+        clazz ->
+        {
+            Map<String, Field> fields = new HashMap<>();
+            for(Field field : clazz.getDeclaredFields())
+            {
+                field.setAccessible(true);
+                fields.put(field.getName(), field);
+            }
+            return fields;
+        }
+    );
+
+    public static Field getField(Class<?> clazz, String fieldName)
+    {
+        Map<String, Field> fields = fieldCache.get(clazz);
+        return fields.get(fieldName);
+    }
+}
+```
+
+= 最佳实践
+
+#cardTip[
+  使用`ClassCache`缓存反射结果可以显著提高性能，特别是对于频繁调用的方法
+]
+
+#cardAttention[
+  确保初始化函数是线程安全的，因为可能被多个线程同时调用
+]
+
+#cardInfo[
+  `ClassCache`内部使用`MapConcurrentWeakHash`，支持高并发场景
+]

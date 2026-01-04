@@ -1,10 +1,7 @@
-#import "./../lib/lib.typ": *
-
+#import "/lib/lib.typ": *;
 #set raw(lang: "java");
-
-#let title = [开发文档]
-
-#show: template.with(title: title)
+#let title = [开发文档];
+#show: template.with(title: title);
 
 
 

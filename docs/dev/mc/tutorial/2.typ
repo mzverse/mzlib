@@ -1,8 +1,6 @@
-#import "../../../lib/lib.typ": *
-
-#let title = [2.创建插件和模块]
-
-#show: template.with(title: title)
+#import "/lib/lib.typ": *;
+#let title = [2.创建插件和模块];
+#show: template.with(title: title);
 
 
 

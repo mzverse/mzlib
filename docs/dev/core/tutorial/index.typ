@@ -1,8 +1,6 @@
-#import "../../../lib/lib.typ": *
-
-#let title = [快速开始]
-
-#show: template.with(title: title)
+#import "/lib/lib.typ": *;
+#let title = [快速开始];
+#show: template.with(title: title);
 
 
 

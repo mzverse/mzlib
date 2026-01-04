@@ -1,8 +1,6 @@
-#import "../../../lib/lib.typ": *
-
-#let title = [Inventory10Slots]
-
-#show: template.with(title: title)
+#import "/lib/lib.typ": *;
+#let title = [Inventory10Slots];
+#show: template.with(title: title);
 
 
 

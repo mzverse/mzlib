@@ -1,8 +1,6 @@
-#import "./../../lib/lib.typ": *
-
-#let title = [窗口]
-
-#show: template.with(title: title)
+#import "/lib/lib.typ": *;
+#let title = [窗口];
+#show: template.with(title: title);
 
 
 
@@ -150,7 +148,161 @@ public interface WindowSlotButton extends WindowSlot
 
 = 内部细节
 
-== TODO
+== 窗口类型
+
+Minecraft提供了多种窗口类型，通过`UnionWindowType`枚举访问
+
+=== 常用窗口类型
+
+```java
+// 箱子界面
+UnionWindowType.GENERIC_9x1  // 9槽
+UnionWindowType.GENERIC_9x2  // 18槽
+UnionWindowType.GENERIC_9x3  // 27槽
+UnionWindowType.GENERIC_9x4  // 36槽
+UnionWindowType.GENERIC_9x5  // 45槽
+UnionWindowType.GENERIC_9x6  // 54槽
+
+// 熔炉
+UnionWindowType.FURNACE
+
+// 工作台
+UnionWindowType.CRAFTING
+
+// 附魔台
+UnionWindowType.ENCHANTMENT
+
+// 酿造台
+UnionWindowType.BREWING_STAND
+
+// 末影箱
+UnionWindowType.GENERIC_3x3
+
+// 铁砧
+UnionWindowType.ANVIL
+
+// 信标
+UnionWindowType.BEACON
+
+// 染料台
+UnionWindowType.DYE
+
+// 羊毛床
+UnionWindowType.BED
+
+// 末影水晶
+UnionWindowType.END_CRYSTAL
+```
+
+=== 获取窗口类型
+
+```java
+WindowTypeV1400 type = UnionWindowType.GENERIC_9x5.typeV1400;
+```
+
+== 槽位索引
+
+窗口中的槽位有固定的索引范围，了解这些索引对于正确操作窗口至关重要
+
+=== 玩家背包槽位
+
+- `0-8`：快捷栏
+- `9-35`：主背包
+- `36-39`：盔甲槽（从上到下：头盔、胸甲、护腿、靴子）
+- `40`：副手槽
+
+=== 箱子窗口槽位
+
+- `0-53`：箱子槽位（取决于箱子大小）
+- `54-62`：玩家快捷栏
+- `63-89`：玩家主背包
+- `90-93`：玩家盔甲槽
+- `94`：玩家副手槽
+
+=== 获取窗口大小
+
+```java
+int size = window.getSlots().size();
+```
+
+== 窗口事件
+
+可以通过监听窗口事件来响应玩家的操作
+
+=== 监听窗口打开
+
+```java
+this.register(new PacketListener<>(PacketS2cOpenWindow.FACTORY, packetEvent->
+{
+    Window window = packetEvent.getPacket().getWindow();
+    Text title = window.getTitle();
+    // 处理窗口打开事件
+}));
+```
+
+=== 监听窗口关闭
+
+```java
+this.register(new PacketListener<>(PacketC2sCloseWindow.FACTORY, packetEvent->
+{
+    int syncId = packetEvent.getPacket().getSyncId();
+    // 处理窗口关闭事件
+}));
+```
+
+=== 监听槽位点击
+
+```java
+this.register(new PacketListener<>(PacketC2sClickWindow.FACTORY, packetEvent->
+{
+    int syncId = packetEvent.getPacket().getSyncId();
+    int slotIndex = packetEvent.getPacket().getSlotIndex();
+    int button = packetEvent.getPacket().getButton();
+    // 处理槽位点击事件
+}));
+```
+
+== 窗口同步机制
+
+窗口同步确保客户端和服务端的物品状态一致
+
+=== 1.17前的同步机制
+
+大致规则为action包中有`onAction`方法的返回值（一个物品），若与服务端的返回值不一致则更新
+
+```java
+@Override
+public ItemStack onAction(EntityPlayer player, int slotIndex, ItemStack itemStack, WindowAction action)
+{
+    // 返回服务端认为的物品状态
+    return itemStack;
+}
+```
+
+=== 1.17+的同步机制
+
+玩家发送的action包中有客户端认为的更改列表（修改后的物品，以及cursor），若服务端发现不一致则发送对应更新包
+
+1.17.1开始包中增加了`revision`字段，用于跟踪版本
+
+=== 1.21.5+的同步机制
+
+action包中仅包含哈希对象而非完整的物品，哈希相等则服务端认为相等，这大大减少了网络传输量
+
+```java
+// 1.21.5+的action处理
+@Override
+public void onActionV2105(EntityPlayer player, int slotIndex, short slotIndexV2105, byte data, WindowAction action)
+{
+    // slotIndex类型改为short
+    // data类型改为byte
+    // 使用哈希比较而非完整物品比较
+}
+```
+
+== 已知问题
+
+=== 鼠标位置问题
 
 在版本[1.14, 1.17)，打开一个窗口始终会使鼠标移动到客户端中央，即使鼠标未被锁定
 
@@ -158,20 +310,137 @@ public interface WindowSlotButton extends WindowSlot
 
 高版本似乎是Paper修复的此问题，Fabric中仍保持原状。待验证
 
-== action
+=== 版本兼容性
 
 自1.21.5起：
 
 - `slotIndex`类型由`int`改为`short`
-
 - `data`类型由`int`改为`byte`
 
-== 同步
+在编写跨版本代码时需要注意这些类型变化
 
-1.17前的同步机制意义不明，大致规则为action包中有onAction方法的返回值（一个物品），若与服务端的返回值不一致则更新
+== 高级用法
 
-从1.17开始，玩家发送的action包中有客户端认为的更改列表（修改后的物品，以及cursor），若服务端发现不一致则发送对应更新包
+=== 自定义窗口标题
 
-1.17.1开始包中增加了revision字段，用处应该不大
+```java
+Text title = Text.literal("我的箱子")
+    .setColor(TextColor.GOLD)
+    .setBold(true);
 
-1.21.5起，action包中仅包含哈希对象而非完整的物品，哈希相等则服务端认为相等
+WindowFactory windowFactory = WindowFactorySimple.chest(
+    title,
+    inventory,
+    5,
+    window->
+    {
+        // 可以在这里进行额外的窗口配置
+    }
+);
+```
+
+=== 动态更新窗口内容
+
+```java
+// 定时更新窗口中的物品
+MinecraftServer.instance.schedule(()->
+{
+    for(int i = 0; i < inventory.getSize(); i++)
+    {
+        ItemStack newItem = createDynamicItem(i);
+        inventory.setItemStack(i, newItem);
+    }
+    // 通知玩家更新窗口
+    player.updateWindowSlot(window, i, newItem);
+}, new SleepTicks(20));
+```
+
+=== 窗口间物品转移
+
+```java
+// 将物品从一个窗口转移到另一个窗口
+public void transferItem(EntityPlayer player, Window fromWindow, Window toWindow, int fromSlot, int toSlot)
+{
+    ItemStack item = fromWindow.getSlot(fromSlot).getItemStack();
+    if(item.isEmpty())
+        return;
+    
+    // 检查目标槽位是否可以放置
+    if(toWindow.getSlot(toSlot).canPlace(item))
+    {
+        fromWindow.getSlot(fromSlot).setCanTake(true);
+        toWindow.getSlot(toSlot).setCanPlace(true);
+        
+        // 执行转移
+        fromWindow.getSlot(fromSlot).setItemStack(ItemStack.empty());
+        toWindow.getSlot(toSlot).setItemStack(item);
+    }
+}
+```
+
+=== 窗口验证
+
+```java
+// 验证窗口状态
+public boolean validateWindow(EntityPlayer player, Window window)
+{
+    // 检查窗口是否仍然打开
+    if(player.getOpenWindow().isNone())
+        return false;
+    
+    // 检查窗口ID是否匹配
+    if(player.getOpenWindow().unwrap().getSyncId() != window.getSyncId())
+        return false;
+    
+    // 检查窗口类型是否匹配
+    if(player.getOpenWindow().unwrap().getType() != window.getType())
+        return false;
+    
+    return true;
+}
+```
+
+== 性能优化
+
+=== 减少窗口更新频率
+
+```java
+// 使用防抖机制减少更新
+private long lastUpdateTime = 0;
+private static final long UPDATE_INTERVAL = 5; // ticks
+
+public void updateWindowIfNeeded(Window window)
+{
+    long currentTime = MinecraftServer.instance.getTicks();
+    if(currentTime - lastUpdateTime >= UPDATE_INTERVAL)
+    {
+        // 执行更新
+        lastUpdateTime = currentTime;
+    }
+}
+```
+
+=== 批量更新槽位
+
+```java
+// 批量更新多个槽位
+public void batchUpdateSlots(EntityPlayer player, Window window, Map<Integer, ItemStack> updates)
+{
+    for(Map.Entry<Integer, ItemStack> entry : updates.entrySet())
+    {
+        int slot = entry.getKey();
+        ItemStack item = entry.getValue();
+        window.getSlot(slot).setItemStack(item);
+    }
+    // 单次通知所有更新
+    player.updateWindowSlots(window, updates);
+}
+```
+
+#cardTip[
+  窗口操作通常在主线程执行，避免在异步线程中直接操作窗口
+]
+
+#cardAttention[
+  自定义窗口时，务必正确处理槽位的`canPlace`和`canTake`方法，否则可能导致物品丢失或重复
+]

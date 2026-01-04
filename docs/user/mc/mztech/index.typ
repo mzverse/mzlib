@@ -1,7 +1,5 @@
-#import "./../../../lib/lib.typ": *;
-
+#import "/lib/lib.typ": *;
 #let title = [MzTech];
-
 #show: template.with(title: title);
 
 

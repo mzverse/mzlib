@@ -1,6 +1,6 @@
 #import "/lib/lib.typ": *;
 #set raw(lang: "java");
-#let title = [条件约束];
+#let title = [约束];
 #show: template.with(title: title);
 
 我们会检查您包装的成员是否存在，因此请标注成员支持的平台 \

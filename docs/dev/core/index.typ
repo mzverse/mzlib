@@ -1,6 +1,6 @@
-#import "/lib/lib.typ": *
-#let title = [Core];
+#import "/lib/lib.typ": *;
 #set raw(lang: "java");
+#let title = [Core];
 #show: template.with(title: title);
 
 = 依赖mzlib-core
