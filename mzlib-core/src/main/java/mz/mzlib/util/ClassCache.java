@@ -1,12 +1,10 @@
 package mz.mzlib.util;
 
-import mz.mzlib.util.proxy.IteratorProxy;
-import mz.mzlib.util.proxy.MapProxy;
-
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
-public class ClassCache<K extends Class<?>, V> implements Iterable<Map.Entry<K, V>>
+public class ClassCache<K extends Class<?>, V>
 {
     Map<K, RefWeak<V>> delegate = new MapConcurrentWeakHash<>();
     Function<? super K, ? extends V> initializer;
@@ -33,14 +31,5 @@ public class ClassCache<K extends Class<?>, V> implements Iterable<Map.Entry<K, 
     public Option<V> put(K clazz, V value)
     {
         return Option.fromNullable(this.delegate.put(clazz, this.value(clazz, value))).map(Ref::get);
-    }
-
-    @Override
-    public Iterator<Map.Entry<K, V>> iterator()
-    {
-        return new IteratorProxy<>(
-            this.delegate.entrySet().iterator(),
-            e -> new MapProxy.EntryProxy<>(e, Function.identity(), FunctionInvertible.of(RefWeak::get, RefWeak::new))
-        );
     }
 }

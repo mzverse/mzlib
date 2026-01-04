@@ -1,9 +1,8 @@
 package mz.mzlib.util;
 
 import java.lang.ref.SoftReference;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -20,12 +19,16 @@ public interface Cache<K, V>
     }
     class Builder<K, V>
     {
-        boolean weakRef = false;
+        boolean weakKey = false;
         Function<K, V> defaultSupplier = ThrowableSupplier.constant((V) null).ignore();
-        public Builder<K, V> weakRef(boolean value)
+        public Builder<K, V> weakKey(boolean value)
         {
-            this.weakRef = value;
+            this.weakKey = value;
             return this;
+        }
+        public Builder<K, V> weakKey()
+        {
+            return this.weakKey(true);
         }
         public Builder<K, V> defaultSupplier(Function<K, V> value)
         {
@@ -34,7 +37,7 @@ public interface Cache<K, V>
         }
         public Cache<K, V> build()
         {
-            return new Impl<>(weakRef ? new WeakHashMap<>() : new HashMap<>(), this.defaultSupplier);
+            return new Impl<>(weakKey ? new MapConcurrentWeakHash<>() : new ConcurrentHashMap<>(), this.defaultSupplier);
         }
     }
 

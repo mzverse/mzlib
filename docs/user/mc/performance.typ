@@ -96,7 +96,9 @@ Method method = cache.getMethod("methodName");
 
 ```java
 // 使用 Cache 缓存计算结果
-Cache<String, Text> textCache = new Cache<>(key -> Text.literal(key));
+Cache<String, Text> textCache = Cache.<String, Text>builder()
+    .defaultSupplier(key -> Text.literal(key))
+    .build();
 
 // 获取缓存
 Text text = textCache.get("key");

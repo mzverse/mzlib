@@ -53,7 +53,7 @@ public class JsUtil
         return new NativeJavaFunction(function);
     }
 
-    static Cache<String, Script> cache = Cache.<String, Script>builder().weakRef(true).build();
+    static Cache<String, Script> cache = Cache.<String, Script>builder().weakKey().build();
     public static Object eval(Settings settings, Object scope, String script)
     {
         try(Context context = settings.enterContext())

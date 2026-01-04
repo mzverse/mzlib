@@ -5,6 +5,7 @@ import java.util.Objects;
 
 /**
  * @see Pair
+ * @see java.util.AbstractMap.SimpleEntry
  */
 @Deprecated
 public class MapEntry<K, V> implements Map.Entry<K, V>

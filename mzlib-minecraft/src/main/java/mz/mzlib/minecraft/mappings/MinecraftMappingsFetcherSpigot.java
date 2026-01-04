@@ -3,7 +3,7 @@ package mz.mzlib.minecraft.mappings;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import mz.mzlib.minecraft.MinecraftPlatform;
-import mz.mzlib.util.CachedValue;
+import mz.mzlib.util.LazyConstant;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,11 +31,11 @@ public class MinecraftMappingsFetcherSpigot
 
     public Mappings<?> fetch(String version, String protocolVersion, File cacheFolder)
     {
-        CachedValue<String> refsGetter = new CachedValue<>(() -> Objects.requireNonNull(new Gson().fromJson(
+        LazyConstant<String> refsGetter = LazyConstant.of(() -> Objects.requireNonNull(new Gson().fromJson(
             MappingsUtil.request(MappingsUtil.url("https://hub.spigotmc.org/versions/" + version + ".json")),
             JsonObject.class
         )).getAsJsonObject("refs").get("BuildData").getAsString());
-        CachedValue<JsonObject> infoGetter = new CachedValue<>(() -> new Gson().fromJson(
+        LazyConstant<JsonObject> infoGetter = LazyConstant.of(() -> new Gson().fromJson(
             MappingsUtil.request(MappingsUtil.url(baseUrl + "info.json" + "?at=" + refsGetter.get())),
             JsonObject.class
         ));
