@@ -1,7 +1,6 @@
 #import "/lib/lib.typ": *;
-#let title = [作为Minecraft插件使用];
+#let title = [Minecraft];
 #show: template.with(title: title);
-
 
 / #[= 为什么要使用MzLibMinecraft]:
 
@@ -9,9 +8,31 @@
 
     基于它的插件也通常是高效的
 
-/ #[= 在服务端中安装]:
+/ #[= 快速开始]:
 
-    #link("./install")[安装MzLibMinecraft]
+    #link("../dev/mc/quick_start")[快速入门] - 5分钟快速上手
+
+/ #[= 安装与配置]:
+
+    #link("./install")[安装MzLibMinecraft] - 安装指南
+    #link("./config")[配置说明] - config.js 配置项说明
+    #link("./features")[功能说明] - 可用功能介绍
+
+/ #[= 使用指南]:
+
+    #link("./commands")[命令列表] - 可用命令
+    #link("./version_compatibility")[版本兼容性] - 版本兼容说明
+
+/ #[= 问题解决]:
+
+    #link("./faq")[常见问题] - FAQ
+    #link("./troubleshooting")[故障排除] - 问题排查指南
+
+/ #[= 进阶指南]:
+
+    #link("./migration")[迁移指南] - 从旧版本迁移
+    #link("./performance")[性能优化] - 性能建议
+    #link("./best_practices")[最佳实践] - 开发建议
 
 / #[= 推荐的平台]:
 

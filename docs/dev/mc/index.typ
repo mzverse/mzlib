@@ -49,3 +49,59 @@ dependencies {
 
 例如，`exampleV_1300__1400_1600`表示在(-∞, 1.13) ∪ [1.14, 1.16)有效；`exampleV_1600__1903`表示1.16之前和从1.19.3开始都有效，在[1.16, 1.19.3)无效
 
+= 文档导航
+
+/ #[= 核心功能]:
+    #link("core")[核心类] - MzLibMinecraft, MinecraftServer, MinecraftPlatform, Player, PlayerManager, Identifier, GlobalConstants, VersionName, VersionRange
+
+/ #[= 物品系统]:
+    #link("item/index")[物品系统] - Item, ItemStack, ItemType, Items, ItemPlayerHead, ItemWrittenBook, ItemTagsV1300
+    #link("item/item")[自定义数据] - 物品自定义数据
+    #link("item/player_head")[玩家头颅] - 玩家头颅物品
+
+/ #[= 实体系统]:
+    #link("entity")[实体] - Entity, EntityLiving, EntityPlayer, EntityType, EntityItem, EntityDataTracker, DamageSource, DisplayEntity
+
+/ #[= 库存与窗口]:
+    #link("inventory")[库存] - Inventory, InventoryPlayer, InventoryCrafting, InventorySimple
+    #link("window")[窗口] - Window 系统
+    #link("ui")[UI] - UiStack, UiWrittenBook, UiAbstractWindow, UiWindowAnvil
+
+/ #[= 配方系统]:
+    #link("recipe")[配方] - RecipeManager, RecipeCrafting, Ingredient
+
+/ #[= 命令系统]:
+    #link("command")[命令] - Command, CommandManager, CommandSource, ArgumentParser
+
+/ #[= 权限系统]:
+    #link("permission")[权限] - Permission, PermissionHelp, EventCheckPermission
+
+/ #[= 事件系统]:
+    #link("event")[事件] - MinecraftEventModule, EventPlayer, EventEntity, EventServer
+
+/ #[= 数据处理]:
+    #link("nbt")[NBT] - NbtCompound, NbtList, NbtElement
+    #link("component")[组件] - ComponentMapV2005, ComponentKeyV2005 (1.20.5+)
+    #link("serialization")[序列化] - CodecV1600, DynamicV1300, JsonOpsV1300
+    #link("datafixer")[数据修复] - DataFixerV1300, DataUpdaterV900_1300
+
+/ #[= 文本系统]:
+    #link("text")[文本组件] - Text, TextLiteral, TextTranslatable, TextStyle, TextColor
+
+/ #[= 网络系统]:
+    #link("network_packet")[网络数据包] - Packet, PacketHandler, PacketListener, C2S/S2C 数据包
+
+/ #[= 其他系统]:
+    #link("i18n")[国际化] - I18nMinecraft, MinecraftI18n, VanillaI18nV_1300
+    #link("mappings")[映射] - Mappings, MappingsMerged, MinecraftMappingsFetcher
+    #link("authlib")[Authlib] - GameProfile, Property, PropertyMap
+    #link("block")[方块] - BlockState, BlockEntity
+    #link("world")[世界] - World, WorldServer
+    #link("mzitem")[自定义物品] - MzItem, MzItemUsable, RegistrarMzItem
+    #link("wrapper")[Wrapper] - WrapMinecraftClass, WrapMinecraftMethod, WrapMinecraftFieldAccessor
+
+/ #[= 教程]:
+    #link("tutorial/index")[教程] - 从基础到进阶的完整教程
+
+/ #[= 示例]:
+    #link("demo/index")[示例] - 代码示例和演示

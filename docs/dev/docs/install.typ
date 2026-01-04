@@ -1,5 +1,5 @@
 #import "/lib/lib.typ": *;
-#let title = [安装Typst];
+#let title = [安装];
 #show: template.with(title: title);
 
 / #[= 本地部署]:
