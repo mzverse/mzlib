@@ -8,14 +8,11 @@ import mz.mzlib.minecraft.entity.player.EntityPlayer;
 import mz.mzlib.minecraft.wrapper.WrapMinecraftClass;
 import mz.mzlib.minecraft.wrapper.WrapMinecraftMethod;
 import mz.mzlib.util.Instance;
-import mz.mzlib.util.RuntimeUtil;
 import mz.mzlib.util.wrapper.WrapperObject;
 
 @WrapMinecraftClass(@VersionName(name = "net.minecraft.server.command.CommandManager"))
 public interface CommandManager extends WrapperObject, Instance
 {
-    CommandManager instance = RuntimeUtil.nul();
-
     @VersionRange(begin = 1300)
     @WrapMinecraftMethod({
         @VersionName(name = "method_17518", end = 1400),

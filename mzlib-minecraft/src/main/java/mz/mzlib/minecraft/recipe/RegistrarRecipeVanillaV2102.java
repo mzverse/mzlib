@@ -41,6 +41,6 @@ public class RegistrarRecipeVanillaV2102 extends RegistrarRecipeVanilla
             result.add(RecipeEntryV2002.of(RecipeRegistration.of(entry.getKey(), (RecipeMojang) entry.getValue())));
         }
         manager.setPreparedRecipesV2102(PreparedRecipesV2102.of(result));
-        manager.initializeV2102(MinecraftServer.instance.getSavePropertiesV1600().getEnabledFeaturesV1903());
+        MinecraftServer.instance.schedule(() -> manager.initializeV2102(MinecraftServer.instance.getSavePropertiesV1600().getEnabledFeaturesV1903()));
     }
 }

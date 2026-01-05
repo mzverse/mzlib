@@ -67,8 +67,6 @@ public class MzLibMinecraft extends MzModule
 
             this.register(ModuleRecipe.instance);
 
-            this.register(MinecraftServer.instance.getCommandManager());
-
             this.register(this.command = new Command("mzlib", "mz").setNamespace(this.MOD_ID));
 
             this.register(DisplayEntityTracker.Module.instance);
