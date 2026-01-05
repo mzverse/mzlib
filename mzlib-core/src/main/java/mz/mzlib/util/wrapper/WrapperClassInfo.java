@@ -204,7 +204,7 @@ public class WrapperClassInfo
             //noinspection RedundantIfStatement
             if(WrapperClass.FACTORY.create(Object.class).getModuleJ9().getWrapped() !=
                 WrapperClass.FACTORY.create(klass).getModuleJ9().getWrapped() &&
-                !WrapperClass.FACTORY.create(klass).getModuleJ9().isOpen(
+                !WrapperClass.FACTORY.create(klass).getModuleJ9().isExported(
                     klass.getPackage() == null ? "" : klass.getPackage().getName(),
                     WrapperClass.FACTORY.create(this.getWrapperClass()).getModuleJ9()
                 ))
@@ -383,11 +383,11 @@ public class WrapperClassInfo
                     Class<?> rt = ((Method) i.getValue()).getReturnType();
                     for(Class<?> j : ptsTar)
                     {
-                        accessible = accessible && this.hasAccessTo(j);
+                        accessible &= this.hasAccessTo(j);
                     }
-                    accessible = accessible && this.hasAccessTo(rt);
+                    accessible &= this.hasAccessTo(rt);
                     rt = ClassUtil.baseType(rt);
-                    if(accessible)
+                    if(accessible) // FIXME: why false? NeoForge::Ingredient
                     {
                         if(!Modifier.isStatic(i.getValue().getModifiers()))
                         {

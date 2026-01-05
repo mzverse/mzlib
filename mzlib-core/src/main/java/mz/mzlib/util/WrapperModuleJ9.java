@@ -16,4 +16,7 @@ public interface WrapperModuleJ9 extends WrapperObject
 
     @WrapMethod("isOpen")
     boolean isOpen(String packageName, WrapperModuleJ9 target);
+
+    @WrapMethod("isExported")
+    boolean isExported(String packageName, WrapperModuleJ9 target);
 }
