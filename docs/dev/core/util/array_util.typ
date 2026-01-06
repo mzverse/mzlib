@@ -2,113 +2,127 @@
 #let title = [ArrayUtil];
 #show: template.with(title: title);
 
-`ArrayUtil` 提供了数组操作的工具方法。
+`ArrayUtil` 提供了基本类型数组和包装类型数组之间的转换方法。
 
-= 创建数组
+= Box 操作（基本类型数组 → 包装类型数组）
+
+将基本类型数组转换为对应的包装类型数组。
 
 ```java
-// 创建空数组
-String[] array = ArrayUtil.emptyArray(String.class);
+// int → Integer
+int[] intArray = {1, 2, 3, 4, 5};
+Integer[] integerArray = ArrayUtil.box(intArray);
 
-// 创建指定长度的数组
-int[] array = ArrayUtil.newArray(int.class, 10);
+// long → Long
+long[] longArray = {1L, 2L, 3L};
+Long[] longWrapperArray = ArrayUtil.box(longArray);
 
-// 从列表创建数组
-String[] array = ArrayUtil.toArray(list, String.class);
+// double → Double
+double[] doubleArray = {1.0, 2.0, 3.0};
+Double[] doubleWrapperArray = ArrayUtil.box(doubleArray);
+
+// boolean → Boolean
+boolean[] booleanArray = {true, false, true};
+Boolean[] booleanWrapperArray = ArrayUtil.box(booleanArray);
+
+// char → Character
+char[] charArray = {'a', 'b', 'c'};
+Character[] charWrapperArray = ArrayUtil.box(charArray);
+
+// byte → Byte
+byte[] byteArray = {1, 2, 3};
+Byte[] byteWrapperArray = ArrayUtil.box(byteArray);
+
+// short → Short
+short[] shortArray = {1, 2, 3};
+Short[] shortWrapperArray = ArrayUtil.box(shortArray);
+
+// float → Float
+float[] floatArray = {1.0f, 2.0f, 3.0f};
+Float[] floatWrapperArray = ArrayUtil.box(floatArray);
+
+// 使用 Object 参数自动识别类型
+Object primitiveArray = new int[]{1, 2, 3};
+Object[] boxedArray = ArrayUtil.box(primitiveArray);
 ```
 
-= 数组操作
+= Unbox 操作（包装类型数组 → 基本类型数组）
+
+将包装类型数组转换为对应的基本类型数组。
 
 ```java
-int[] array = {1, 2, 3, 4, 5};
+// Integer → int
+Integer[] integerArray = {1, 2, 3, 4, 5};
+int[] intArray = ArrayUtil.unbox(integerArray);
 
-// 判断是否为空
-boolean empty = ArrayUtil.isEmpty(array);
+// Long → long
+Long[] longWrapperArray = {1L, 2L, 3L};
+long[] longArray = ArrayUtil.unbox(longWrapperArray);
 
-// 获取长度
-int length = ArrayUtil.length(array);
+// Double → double
+Double[] doubleWrapperArray = {1.0, 2.0, 3.0};
+double[] doubleArray = ArrayUtil.unbox(doubleWrapperArray);
 
-// 转换为列表
-List<Integer> list = ArrayUtil.toList(array);
+// Boolean → boolean
+Boolean[] booleanWrapperArray = {true, false, true};
+boolean[] booleanArray = ArrayUtil.unbox(booleanWrapperArray);
 
-// 复制数组
-int[] copy = ArrayUtil.copyOf(array);
+// Character → char
+Character[] charWrapperArray = {'a', 'b', 'c'};
+char[] charArray = ArrayUtil.unbox(charWrapperArray);
 
-// 反转数组
-int[] reversed = ArrayUtil.reverse(array);
-```
+// Byte → byte
+Byte[] byteWrapperArray = {1, 2, 3};
+byte[] byteArray = ArrayUtil.unbox(byteWrapperArray);
 
-= 查找操作
+// Short → short
+Short[] shortWrapperArray = {1, 2, 3};
+short[] shortArray = ArrayUtil.unbox(shortWrapperArray);
 
-```java
-String[] array = {"a", "b", "c", "d"};
+// Float → float
+Float[] floatWrapperArray = {1.0f, 2.0f, 3.0f};
+float[] floatArray = ArrayUtil.unbox(floatWrapperArray);
 
-// 查找元素
-int index = ArrayUtil.indexOf(array, "c");
-
-// 查找最后一个出现的位置
-int lastIndex = ArrayUtil.lastIndexOf(array, "a");
-
-// 检查是否包含
-boolean contains = ArrayUtil.contains(array, "b");
-```
-
-= 修改操作
-
-```java
-int[] array = {1, 2, 3, 4, 5};
-
-// 添加元素
-int[] newArray = ArrayUtil.add(array, 6);
-
-// 移除元素
-int[] newArray = ArrayUtil.remove(array, 3);
-
-// 连接数组
-int[] combined = ArrayUtil.concat(array1, array2);
-
-// 填充数组
-ArrayUtil.fill(array, 0);
+// 使用 Object 参数自动识别类型
+Object[] wrapperArray = new Integer[]{1, 2, 3};
+Object primitiveArray = ArrayUtil.unbox(wrapperArray);
 ```
 
 = 使用示例
 
 ```java
-// 安全的数组操作
-public void processArray(String[] array)
+// 将基本类型数组用于需要泛型的场景
+public List<Integer> intArrayToList(int[] array)
 {
-    if (ArrayUtil.isEmpty(array))
-    {
-        return;
-    }
-
-    String first = array[0];
-    System.out.println("First: " + first);
+    return Arrays.asList(ArrayUtil.box(array));
 }
 
-// 动态构建数组
-public int[] buildArray(int... values)
+// 从包装类型数组恢复为基本类型数组
+public int[] listToIntArray(List<Integer> list)
 {
-    return values;
+    return ArrayUtil.unbox(list.toArray(new Integer[0]));
 }
 
-// 过滤数组
-public String[] filter(String[] array, Predicate<String> predicate)
+// 对基本类型数组进行流式处理
+public int[] filterAndMap(int[] array, Predicate<Integer> predicate, Function<Integer, Integer> mapper)
 {
-    List<String> list = new ArrayList<>();
-    for (String s : array)
-    {
-        if (predicate.test(s))
-        {
-            list.add(s);
-        }
-    }
-    return ArrayUtil.toArray(list, String.class);
+    return ArrayUtil.unbox(
+        Arrays.stream(ArrayUtil.box(array))
+            .filter(predicate)
+            .map(mapper)
+            .toArray(Integer[]::new)
+    );
 }
+
+// 示例：过滤出偶数并乘以 2
+int[] numbers = {1, 2, 3, 4, 5, 6};
+int[] result = filterAndMap(numbers, i -> i % 2 == 0, i -> i * 2);
+// result = [4, 8, 12]
 ```
 
 = 注意事项
 
-- 所有方法都处理 null 输入
-- 返回的新数组是独立的副本
-- 基本类型数组需要使用对应的类型
+- `box` 操作会创建新的包装类型数组，不会修改原数组
+- `unbox` 操作会创建新的基本类型数组，不会修改原数组
+- 使用 `Object` 参数的方法会自动识别数组类型，但如果传入非基本类型数组会抛出 `ClassCastException`
+- 所有方法都支持所有 8 种基本类型（int、long、double、boolean、char、byte、short、float）

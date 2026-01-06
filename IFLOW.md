@@ -192,24 +192,18 @@ ElementSwitcher 是一个通用的注解驱动开关系统，用于根据运行�
 
 **常用注解**:
 
-1. **@JvmVersion**（JVM 版本检查）
-   ```java
-   @JvmVersion(begin = 11)  // Java 11及以上启用
-   public class SomeClass { ... }
-   ```
-
-2. **@VersionRange**（Minecraft 版本检查，在 mzlib-minecraft 中）
+1. **@VersionRange**（Minecraft 版本检查，在 mzlib-minecraft 中）
    ```java
    @VersionRange(begin = 1300)  // 1.13及以上启用
    @VersionRange(end = 1200)    // 1.11.x及以下启用
    @VersionRange(begin = 1300, end = 1903)  // [1.13, 1.19.3)启用
    ```
 
-3. **@Enabled** / **@Disabled**（平台标签检查，在 mzlib-minecraft 中）
+2. **MinecraftPlatform.Enabled** / **MinecraftPlatform.Disabled**（平台标签检查，在 mzlib-minecraft 中）
    ```java
-   @Enabled("bukkit")    // 仅在Bukkit平台启用
-   @Enabled("paper")     // 仅在Paper平台启用
-   @Disabled("fabric")   // 在Fabric平台禁用
+   @MinecraftPlatform.Enabled("bukkit")    // 仅在Bukkit平台启用
+   @MinecraftPlatform.Enabled("paper")     // 仅在Paper平台启用
+   @MinecraftPlatform.Disabled("fabric")   // 在Fabric平台禁用
    ```
 
 **使用示例**:
@@ -220,18 +214,18 @@ public class NewFeatureV1300 {
     // 方法级别：仅1.13-1.16版本启用
     @VersionRange(end = 1600)
     public void oldMethod() { ... }
-    
+
     // 方法级别：仅Paper平台启用
-    @Enabled("paper")
+    @MinecraftPlatform.Enabled("paper")
     public void paperOnlyMethod() { ... }
 }
 
 // 类级别：仅Bukkit平台启用
-@Enabled("bukkit")
+@MinecraftPlatform.Enabled("bukkit")
 public class BukkitSpecificClass { ... }
 
 // 组合示例：仅Bukkit平台的1.13+版本启用（AND 逻辑）
-@Enabled("bukkit")
+@MinecraftPlatform.Enabled("bukkit")
 @VersionRange(begin = 1300)
 public class BukkitNewFeatureV1300 { ... }
 ```
@@ -240,7 +234,7 @@ public class BukkitNewFeatureV1300 { ... }
 
 1. **AND 逻辑（多个不同注解）**
    - 多个不同注解同时存在时，取 AND 逻辑
-   - 例如：`@Enabled("bukkit")` + `@VersionRange(begin = 1300)` 表示仅在 Bukkit 平台且版本 >= 1.13 时启用
+   - 例如：`@MinecraftPlatform.Enabled("bukkit")` + `@VersionRange(begin = 1300)` 表示仅在 Bukkit 平台且版本 >= 1.13 时启用
    - 所有条件必须同时满足才启用
 
 2. **OR 逻辑（注解自动合并）**
@@ -465,8 +459,14 @@ class SomeClassV1300 {
 - **行宽**: 120 字符
 - **注释**: JavaDoc 格式，中英文均可，保持一致性
 - **导入顺序**: 标准库 → 第三方库 → 项目内部
-- **内部类导入**: 通常不 import 内部类，而是每次写完整的 `外部类.内部类`
+- **内部类导入**: 不应当 import 内部类，而是每次写完整的 `外部类.内部类`
   - 避免使用 `import 外部类.内部类`
+  - 例如：使用 `OuterClass.InnerClass` 而不是 `import OuterClass.InnerClass;`
+- **@Enabled 完整路径**: 使用 `@Enabled` 注解时需要写内部类的完整路径
+  - 外部类可以正常 import
+  - 例如：`import mz.mzlib.minecraft.@MinecraftPlatform;` 然后使用 `@MinecraftPlatform.Enabled("bukkit")`
+  - 或者直接使用：`@mz.mzlib.minecraft.@MinecraftPlatform.Enabled("bukkit")`
+  - 这样可以明确注解的来源，避免混淆
 
 #### 代码示例
 ```java
@@ -952,7 +952,7 @@ WrapperEntityPlayer.setStaticField("value");
 
 #### 参数说明
 
-- **value**: 声明方法的方法名，表示当前方法是该声明方法的特定实现
+- **value**: 声明方法的方法名（可以是抽象方法或接口方法），表示当前方法是该声明方法的特定实现
 
 #### 命名规范
 
@@ -1133,6 +1133,11 @@ boolean result2 = wrapper1.equals(obj1);
 ### Minecraft 专用注解
 
 Minecraft 模块提供了四个专用注解用于版本特定的包装，这些注解中的 `value` 字段是 `@VersionName` 注解数组，表示在各版本段的不同名称。
+
+**重要特性**：
+- 这些注解同时实现了 `ElementSwitcher` 接口和对应的 `WrappedClassFinder`/`WrappedMemberFinder` 接口
+- 这意味着它们既具有开关功能（根据版本范围自动启用/禁用），又具有查找功能（根据版本范围查找对应的类/方法/字段）
+- 只有当注解中的某个 `@VersionName` 匹配当前版本时，该元素才会被启用
 
 **平台映射机制**：
 - 注解中的 `name` 字段使用的是 **Yarn 表（或旧版本的 legacy Yarn）的名称**
@@ -1465,3 +1470,364 @@ open build/reports/build/index.html  # macOS
 - 编译后生成 HTML 文件
 - 链接应该指向编译后的 HTML 文件，而不是源文件
 - Typst 会自动处理文件扩展名
+
+### 11.5 Typst 标题层级规则
+在编写 Typst 文档时，必须遵守标题层级的规范：
+
+**标题符号**：
+- `=` - 一级标题
+- `==` - 二级标题
+- `===` - 三级标题
+- `====` - 四级标题
+- 以此类推
+
+**层级规则**：
+- 一级标题后不能直接跳到三级标题，必须先有二级标题
+- 标题层级必须逐步递增，不能跳级
+
+**错误示例**：
+```typst
+= 一级标题
+
+=== 三级标题  // 错误：跳过了二级标题
+```
+
+**正确示例**：
+```typst
+= 一级标题
+
+== 二级标题
+
+=== 三级标题
+```
+
+**原因**：
+- 保持文档结构的清晰和一致性
+- 便于阅读和维护
+- 符合 Typst 的语法规范
+
+### 11.6 模块系统核心概念
+
+模块系统是 MzLib 的核心概念之一，用于模块化编写各功能并管理生命周期。
+
+#### 核心特性
+
+1. **模块化设计**：将功能拆分为独立的模块，每个模块负责特定的功能
+2. **生命周期管理**：提供加载和卸载机制，自动管理组件的生命周期
+3. **自动注销**：模块卸载时自动注销所有注册的组件，无需手动管理
+4. **单例常量**：模块通常定义为 `static final` 单例常量
+5. **依赖管理**：注册器支持依赖管理，自动解析依赖关系并进行拓扑排序
+
+#### 模块生命周期
+
+模块的生命周期分为两个阶段：
+
+1. **加载阶段 (load)**：
+   - 调用 `load()` 方法
+   - 调用 `onLoad()` 初始化模块
+   - 注册子模块
+   - 注册组件（监听器、命令等）
+
+2. **卸载阶段 (unload)**：
+   - 调用 `unload()` 方法
+   - 按照注册相反的顺序自动注销所有组件
+   - 卸载子模块
+   - 调用 `onUnload()` 清理资源
+
+#### 程序入口点
+
+一个程序（插件）在入口点加载其主模块（通常是一个），在程序生命周期结束时卸载主模块。主模块使用 `load()` 和 `unload()` 手动管理：
+
+```java
+public class MyPlugin
+{
+    public static MyPlugin instance = new MyPlugin();
+    public static final MainModule mainModule = new MainModule();
+
+    public void onEnable()
+    {
+        // 加载主模块
+        mainModule.load();
+    }
+
+    public void onDisable()
+    {
+        // 卸载主模块
+        mainModule.unload();
+    }
+}
+```
+
+#### 模块定义
+
+模块通常定义为单例常量。主模块在 `onLoad()` 中注册子模块：
+
+```java
+public class MainModule extends MzModule
+{
+    public static final MainModule instance = new MainModule();
+
+    @Override
+    public void onLoad()
+    {
+        // 注册子模块
+        this.register(CommandModule.instance);
+        this.register(ListenerModule.instance);
+
+        // 注册事件监听器
+        this.register(new EventListener<>(MyEvent.class, Priority.HIGH, event -> {
+            // 处理事件
+        }));
+    }
+
+    @Override
+    public void onUnload()
+    {
+        // 清理资源（所有注册的组件会自动注销）
+    }
+}
+```
+
+#### 子模块
+
+子模块只需在其父模块的 `onLoad()` 中注册即可，无需手动调用 `load()` 和 `unload()`：
+
+```java
+public class CommandModule extends MzModule
+{
+    public static final CommandModule instance = new CommandModule();
+
+    @Override
+    public void onLoad()
+    {
+        // 注册命令
+        this.register(MyCommand.instance);
+    }
+}
+```
+
+**重要规则**：
+- 主模块：在程序入口点使用 `load()` 和 `unload()` 手动管理
+- 子模块：只需在父模块的 `onLoad()` 中通过 `this.register(subModule)` 注册即可
+- 父模块卸载时会自动卸载所有子模块
+
+#### 自动注销机制
+
+模块系统会自动管理组件的生命周期：
+
+- 注册时记录所有组件
+- 卸载时按照注册相反的顺序自动注销所有内容
+- 包括子模块（子模块的注销即卸载）
+- 无需手动管理注销逻辑
+
+#### 注册器系统
+
+注册器是模块中的重要概念，用于管理特定类型对象的注册和注销。
+
+**注册器的核心特性**：
+
+1. **注册器本身需要注册**：注册器本身同样需要注册到模块中
+2. **支持的对象类型**：每个注册器通过 `getType()` 方法指定其支持的对象类型
+3. **可注册性检查**：通过 `isRegistrable()` 方法判断对象是否可以被注册
+4. **依赖管理**：通过 `getDependencies()` 方法声明依赖的注册器，系统会自动解析依赖关系
+
+**注册器接口**：
+
+```java
+public interface IRegistrar<T>
+{
+    // 获取支持的类型
+    Class<T> getType();
+
+    // 判断对象是否可注册
+    default boolean isRegistrable(T object)
+    {
+        return true;
+    }
+
+    // 注册对象
+    void register(MzModule module, T object);
+
+    // 注销对象
+    void unregister(MzModule module, T object);
+
+    // 获取依赖的注册器
+    default Set<IRegistrar<?>> getDependencies()
+    {
+        return new HashSet<>();
+    }
+}
+```
+
+**注册器管理器**：
+
+`RegistrarRegistrar` 是注册器的管理器，用于管理所有注册器：
+
+```java
+public class RegistrarRegistrar implements IRegistrar<IRegistrar<?>>
+{
+    public static RegistrarRegistrar instance = new RegistrarRegistrar();
+
+    // 按类型存储所有注册器
+    public final Map<Class<?>, Set<IRegistrar<?>>> registrars = new ConcurrentHashMap<>();
+}
+```
+
+**重要概念**：
+
+1. **模块与作用域无关**：
+   - 注册器所在的模块与被注册对象所在模块无需有关联
+   - 模块仅决定生命周期，不决定作用域
+   - 若想限制作用域，请使用 ClassLoader
+
+2. **注册流程**：
+   - 注册器先注册到模块中
+   - 然后其支持的对象可以被注册
+   - 系统会自动找到支持该对象类型的注册器
+
+3. **依赖解析**：
+   - 注册器可以声明依赖其他注册器
+   - 系统会自动解析依赖关系并进行拓扑排序
+   - 按照依赖顺序注册，按照相反顺序注销
+
+**示例**：
+
+```java
+// 定义注册器
+public class MyRegistrar implements IRegistrar<MyObject>
+{
+    public static final MyRegistrar instance = new MyRegistrar();
+
+    @Override
+    public Class<MyObject> getType()
+    {
+        return MyObject.class;
+    }
+
+    @Override
+    public void register(MzModule module, MyObject object)
+    {
+        // 注册逻辑
+    }
+
+    @Override
+    public void unregister(MzModule module, MyObject object)
+    {
+        // 注销逻辑
+    }
+}
+
+// 在模块中注册注册器
+public class MyModule extends MzModule
+{
+    public static final MyModule instance = new MyModule();
+
+    @Override
+    public void onLoad()
+    {
+        // 注册注册器
+        this.register(MyRegistrar.instance);
+
+        // 注册对象（系统会自动找到支持该对象类型的注册器）
+        this.register(new MyObject());
+    }
+}
+```
+
+#### Registrable 接口
+
+`Registrable` 是一个简单实现，类只需实现它及其两个方法即可被注册注销而无需专用注册器。
+
+**Registrable 接口**：
+
+```java
+public interface Registrable
+{
+    void onRegister(MzModule module);
+
+    void onUnregister(MzModule module);
+}
+```
+
+**RegistrableRegistrar**：
+
+`RegistrableRegistrar` 是 `Registrable` 的专用注册器，已经内置在系统中：
+
+```java
+public class RegistrableRegistrar implements IRegistrar<Registrable>
+{
+    public static RegistrableRegistrar instance = new RegistrableRegistrar();
+
+    @Override
+    public Class<Registrable> getType()
+    {
+        return Registrable.class;
+    }
+
+    @Override
+    public void register(MzModule module, Registrable object)
+    {
+        object.onRegister(module);
+    }
+
+    @Override
+    public void unregister(MzModule module, Registrable object)
+    {
+        object.onUnregister(module);
+    }
+}
+```
+
+**使用示例**：
+
+```java
+// 实现 Registrable 接口
+public class MyComponent implements Registrable
+{
+    public static final MyComponent instance = new MyComponent();
+
+    @Override
+    public void onRegister(MzModule module)
+    {
+        // 注册时的初始化逻辑
+        System.out.println("Registered to module: " + module);
+    }
+
+    @Override
+    public void onUnregister(MzModule module)
+    {
+        // 注销时的清理逻辑
+        System.out.println("Unregistered from module: " + module);
+    }
+}
+
+// 在模块中注册
+public class MyModule extends MzModule
+{
+    public static final MyModule instance = new MyModule();
+
+    @Override
+    public void onLoad()
+    {
+        // 直接注册，无需专用注册器
+        this.register(MyComponent.instance);
+    }
+}
+```
+
+**使用场景**：
+
+`Registrable` 适用于固定的注册注销逻辑。如果需要动态的注册注销逻辑，则需要将注册器本身动态注册到模块中。
+
+- **固定逻辑**：使用 `Registrable` 接口，无需创建专用注册器
+- **动态逻辑**：将注册器本身动态注册到模块中，支持运行时条件
+
+#### 最佳实践
+
+1. **使用单例常量**：模块通常使用 `static final` 单例常量
+2. **在 onLoad 中注册组件**：所有组件注册应该在 `onLoad` 中完成
+3. **在 onUnload 中清理资源**：资源清理应该在 `onUnload` 中完成
+4. **利用自动注销**：不要在 `onUnload` 中手动注销组件，系统会自动处理
+5. **选择合适的注册方式**：
+   - 固定的注册注销逻辑：使用 `Registrable` 接口
+   - 动态的注册注销逻辑：将注册器本身动态注册到模块中
