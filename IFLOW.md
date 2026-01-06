@@ -165,6 +165,7 @@ BUILD_TYPE=release ./gradlew build
   - `nothing/`: 零开销注入系统
   - `wrapper/`: 包装器系统
   - `Option.java`, `Result.java`, `Either.java`: 函数式编程类型
+  - `ElementSwitcher.java`: 注解驱动开关系统
 - `mz.mzlib.event`: 事件系统（Event、EventListener、Cancellable）
 - `mz.mzlib.data`: 数据处理（DataHandler、DataKey）
 - `mz.mzlib.i18n`: 国际化支持（I18n）
@@ -172,6 +173,98 @@ BUILD_TYPE=release ./gradlew build
 - `mz.mzlib.plugin`: 插件管理（Plugin、PluginManager）
 - `mz.mzlib.tester`: 测试框架（Tester、TesterContext）
 - `mz.mzlib.asm`: 完整的 ASM 字节码操作库（嵌入版本）
+
+**核心工具类**:
+
+#### ElementSwitcher 系统
+ElementSwitcher 是一个通用的注解驱动开关系统，用于根据运行时条件动态启用或禁用类、方法、字段等元素。
+
+**核心组件**:
+- `ElementSwitcher<T extends Annotation>`: 核心接口，定义 `isEnabled()` 方法
+- `ElementSwitcherClass`: 元注解，用于标记自定义注解并指定对应的处理器
+
+**工作原理**:
+1. 自定义注解使用 `@ElementSwitcherClass` 指定对应的 `ElementSwitcher` 实现类
+2. `ElementSwitcher.isEnabled(AnnotatedElement)` 方法遍历元素的所有注解
+3. 查找带有 `@ElementSwitcherClass` 的注解并实例化对应的处理器
+4. 调用 `isEnabled()` 方法检查是否启用
+5. 如果任何处理器返回 `false`，则整个元素被视为禁用
+
+**常用注解**:
+
+1. **@JvmVersion**（JVM 版本检查）
+   ```java
+   @JvmVersion(begin = 11)  // Java 11及以上启用
+   public class SomeClass { ... }
+   ```
+
+2. **@VersionRange**（Minecraft 版本检查，在 mzlib-minecraft 中）
+   ```java
+   @VersionRange(begin = 1300)  // 1.13及以上启用
+   @VersionRange(end = 1200)    // 1.11.x及以下启用
+   @VersionRange(begin = 1300, end = 1903)  // [1.13, 1.19.3)启用
+   ```
+
+3. **@Enabled** / **@Disabled**（平台标签检查，在 mzlib-minecraft 中）
+   ```java
+   @Enabled("bukkit")    // 仅在Bukkit平台启用
+   @Enabled("paper")     // 仅在Paper平台启用
+   @Disabled("fabric")   // 在Fabric平台禁用
+   ```
+
+**使用示例**:
+```java
+// 类级别：仅1.13+版本启用
+@VersionRange(begin = 1300)
+public class NewFeatureV1300 {
+    // 方法级别：仅1.13-1.16版本启用
+    @VersionRange(end = 1600)
+    public void oldMethod() { ... }
+    
+    // 方法级别：仅Paper平台启用
+    @Enabled("paper")
+    public void paperOnlyMethod() { ... }
+}
+
+// 类级别：仅Bukkit平台启用
+@Enabled("bukkit")
+public class BukkitSpecificClass { ... }
+
+// 组合示例：仅Bukkit平台的1.13+版本启用（AND 逻辑）
+@Enabled("bukkit")
+@VersionRange(begin = 1300)
+public class BukkitNewFeatureV1300 { ... }
+```
+
+**逻辑规则**:
+
+1. **AND 逻辑（多个不同注解）**
+   - 多个不同注解同时存在时，取 AND 逻辑
+   - 例如：`@Enabled("bukkit")` + `@VersionRange(begin = 1300)` 表示仅在 Bukkit 平台且版本 >= 1.13 时启用
+   - 所有条件必须同时满足才启用
+
+2. **OR 逻辑（注解自动合并）**
+   - 同一注解多次标注时，使用注解的自动合并特性实现 OR 逻辑
+   - 例如：标注多个 `@VersionRange` 会自动合并为 `@VersionRanges` 注解
+   - `@VersionRanges` 自定义处理为在任意一个版本段均生效（OR）
+   ```java
+   @VersionRange(begin = 1300, end = 1600)
+   @VersionRange(begin = 1900)
+   public class SomeClass {
+       // 等价于：在 [1.13, 1.16) 或 [1.19, ∞) 版本启用
+   }
+   ```
+
+3. **优先级**
+   - AND 逻辑的优先级高于 OR 逻辑
+   - 先计算各注解的 AND 结果，再计算同一注解的 OR 结果
+
+**设计优势**:
+- 类型安全：基于注解和接口，编译时检查
+- 可扩展：可以轻松添加新的条件检查注解
+- 运行时灵活：根据实际运行环境动态启用/禁用代码
+- 无侵入性：通过注解标记，不影响正常代码逻辑
+- 组合使用：支持多个条件注解同时使用
 
 **依赖**: 无（基础模块）
 
@@ -372,6 +465,8 @@ class SomeClassV1300 {
 - **行宽**: 120 字符
 - **注释**: JavaDoc 格式，中英文均可，保持一致性
 - **导入顺序**: 标准库 → 第三方库 → 项目内部
+- **内部类导入**: 通常不 import 内部类，而是每次写完整的 `外部类.内部类`
+  - 避免使用 `import 外部类.内部类`
 
 #### 代码示例
 ```java
@@ -492,8 +587,10 @@ public interface WrapperClassV2000 {
 **@VersionName 参数说明**:
 - `begin`: 下界（包含），默认为 0
 - `end`: 上界（不包含），默认为 `Integer.MAX_VALUE`
-- `name`: 类名或方法名
-- `remap`: 是否重新映射，默认为 true
+- `name`: 类名、方法名或字段名（使用 Yarn 映射或 legacy Yarn 的名称）
+- `remap`: 是否进行平台映射，默认为 `true`
+  - `true`：根据所在平台自动映射（Fabric 使用 Yarn 名称，其他平台映射到 Mojang 映射）
+  - `false`：直接使用 `name` 字段中的名称，不进行映射
 
 #### 映射系统
 项目使用映射系统适配不同版本的 Minecraft 类名和方法名：
@@ -510,7 +607,143 @@ public interface WrapperClassV2000 {
 - 提供统一的 API 访问不同版本的原版类
 
 ### 5.4 Wrapper 系统
+
+#### 基本作用
+
+Wrapper 系统主要用于以下两种场景：
+
+1. **目标类或成员需要在运行时确定或可能不存在**
+   - 例如：不同 Minecraft 版本中某些类或成员可能不存在
+   - Wrapper 可以通过版本注解（如 `@VersionRange`）在编译时定义，在运行时根据实际环境选择实现
+   - 避免了直接使用反射运行时查找的性能开销
+
+2. **目标类或成员需要访问权限（如 private 或 protected）**
+   - 例如：需要访问 Minecraft 原版类的私有字段或方法
+   - Wrapper 可以突破访问限制，提供对私有成员的访问
+   - 无需手动编写反射代码，类型安全且性能更好
+
 Wrapper 系统提供优雅的原版类包装，无需反射。绝大部分情况下（为了兼容性），不直接调用 MC 的类和成员，而是使用 wrapper 工具对其进行封装，然后间接调用。
+
+#### WrapperObject 基类
+
+`WrapperObject` 是 Wrapper 系统的核心基类，所有 Wrapper 类都必须直接或间接继承它。
+
+##### 重要规则
+
+1. **所有 Wrapper 类必须是 interface，不能是 class**
+   - Wrapper 类必须定义为接口
+   - 这是 Wrapper 系统的工作机制决定的
+   - 错误示例：`public class WrapperEntityPlayer { ... }`
+   - 正确示例：`public interface WrapperEntityPlayer { ... }`
+
+2. **所有 Wrapper 类必须直接或间接继承 WrapperObject**
+   - WrapperObject 提供了基础的包装功能
+   - 继承 WrapperObject 可以获得类型转换、实例检查等通用能力
+   - 错误示例：`public interface WrapperEntityPlayer { ... }`（未继承 WrapperObject）
+   - 正确示例：`public interface WrapperEntityPlayer extends WrapperObject { ... }`
+
+##### WrapperObject 的特殊作用
+
+`WrapperObject` 自身代表了 `Object` 的包装类，提供对 Object 的基本封装：
+
+- **`toString()`**：调用被包装对象的 `toString()`
+- **`hashCode()`**：调用被包装对象的 `hashCode()`
+- **`equals(Object)`**：比较被包装对象（参见 @SpecificImpl 的巧妙实现）
+- **`clone()`**：克隆被包装对象
+- **`getWrapped()`**：获取被包装的对象
+- **`setWrapped(Object)`**：设置被包装的对象
+
+##### 示例
+
+```java
+// ✅ 正确：Wrapper 类必须是 interface 并继承 WrapperObject
+@WrapClass(NmsEntityPlayer.class)
+public interface WrapperEntityPlayer extends WrapperObject {
+    WrapperFactory<WrapperEntityPlayer> FACTORY = WrapperFactory.of(WrapperEntityPlayer.class);
+
+    @WrapMethod("getName")
+    String getName();
+}
+
+// ❌ 错误：使用 class 定义 Wrapper
+public class WrapperEntityPlayer {
+    // ...
+}
+
+// ❌ 错误：未继承 WrapperObject
+public interface WrapperEntityPlayer {
+    // ...
+}
+```
+
+#### FACTORY 字段
+
+每个 Wrapper 类都应当添加 `FACTORY` 字段，这是 Wrapper 系统的重要入口点。
+
+##### FACTORY 字段的作用
+
+```java
+WrapperFactory<WrapperEntityPlayer> FACTORY = WrapperFactory.of(WrapperEntityPlayer.class);
+```
+
+**重要性**：
+- 提供对此 Wrapper 类的统一入口
+- 相比 `Class<?>` 对象包含更多信息
+- 可以由 `Class<?>` 对象得到，但直接使用 FACTORY 更高效
+
+##### 使用方式
+
+```java
+// 创建实例
+WrapperEntityPlayer player = WrapperEntityPlayer.FACTORY.create(rawPlayer);
+
+// 类型检查
+boolean isPlayer = wrapper.is(WrapperEntityPlayer.FACTORY);
+
+// 类型转换
+WrapperEntityPlayer player = wrapper.as(WrapperEntityPlayer.FACTORY);
+
+// 获取静态成员
+String staticField = WrapperEntityPlayer.FACTORY.getStatic().static$getStaticField();
+```
+
+##### 与 Class<?> 的区别
+
+- **FACTORY**：包含 Wrapper 类的所有元信息，性能更高
+- **Class<?>**：仅包含基本的类信息，需要额外查找
+
+```java
+// ✅ 推荐：使用 FACTORY（高效）
+WrapperEntityPlayer player = WrapperEntityPlayer.FACTORY.create(rawPlayer);
+
+// ⚠️ 不推荐：使用 Class<?>（效率较低）
+WrapperFactory<WrapperEntityPlayer> factory = WrapperFactory.of(WrapperEntityPlayer.class);
+WrapperEntityPlayer player = factory.create(rawPlayer);
+```
+
+##### 特殊情况
+
+某些特殊用法（如 Nothing）不需要添加 FACTORY 字段，因为这些类不会被直接使用。
+
+##### 静态 create 方法
+
+**历史遗留产物（将被移除）**：
+
+```java
+// ❌ 不要使用：静态 create 方法（历史遗留，将被移除）
+@Deprecated
+static WrapperObject create(Object wrapped)
+{
+    return WrapperObject.create(WrapperObject.class, wrapped);
+}
+```
+
+**新增的 Wrapper 类不需要写静态 create 方法**，直接使用 FACTORY 字段即可：
+
+```java
+// ✅ 正确：使用 FACTORY
+WrapperEntityPlayer player = WrapperEntityPlayer.FACTORY.create(rawPlayer);
+```
 
 #### 基本用法
 
@@ -518,7 +751,7 @@ Wrapper 系统提供优雅的原版类包装，无需反射。绝大部分情况
 ```java
 @WrapClass(NmsEntityPlayer.class)
 public interface WrapperEntityPlayer extends WrapperObject {
-    // 工厂字段（每个 wrapper 类都需要）
+    // 工厂字段（每个 wrapper 类都应当添加）
     WrapperFactory<WrapperEntityPlayer> FACTORY = WrapperFactory.of(WrapperEntityPlayer.class);
     
     // 普通方法
@@ -586,6 +819,7 @@ player.setHealth(20.0);
 // 实例方法
 WrapperEntityPlayer player = WrapperEntityPlayer.FACTORY.create(rawPlayer);
 player.getHealth();
+```
 
 #### 静态成员和构造器
 
@@ -701,9 +935,213 @@ WrapperEntityPlayer.setStaticField("value");
 - 支持内部类包装（`@WrapInnerClass`）
 - 支持动态类加载（`@WrapClassForName`）
 
+### @SpecificImpl 注解
+
+`@SpecificImpl` 是 Wrapper 系统中的核心注解，用于为同一个方法声明提供多个特定实现，根据运行时条件（如版本、平台）自动选择合适的实现。
+
+#### 核心用途
+
+当同一个方法在不同版本或平台有不同的实现时，可以使用 `@SpecificImpl` 来标记这些特定实现的方法。
+
+#### 工作原理
+
+1. **方法声明**：在接口中声明一个方法（可以是纯声明或带 default 实现）
+2. **特定实现**：创建特定实现的方法，使用 `@SpecificImpl("声明方法名")` 标记
+3. **自动选择**：Wrapper 系统根据 `ElementSwitcher` 机制（如 `@VersionRange`）自动选择启用的实现
+4. **调用方式**：使用时只需调用原声明的方法，系统会自动路由到正确的实现
+
+#### 参数说明
+
+- **value**: 声明方法的方法名，表示当前方法是该声明方法的特定实现
+
+#### 命名规范
+
+- 特定实现方法的名称通常在原方法名后添加版本标识符（如 `V_1900`、`V1900`）
+- 也可以使用 `$impl` 后缀（如 `equals$impl`），但这主要用于处理特殊情况
+
+#### 基本示例（来自 Text.java）
+
+```java
+// 方法声明（纯声明，不使用 @WrapMethod 等实现注解）
+Text setColor(TextColor value);
+
+// 1.16 以下的特定实现
+@SpecificImpl("setColor")
+@VersionRange(end = 1600)
+default Text setColorV_1600(TextColor value)
+{
+    this.style().setColorV_1600(value);
+    return this;
+}
+
+// 1.16 及以上的特定实现
+@SpecificImpl("setColor")
+@VersionRange(begin = 1600)
+default Text setColorV1600(TextColor value)
+{
+    this.setStyle(this.style().withColorV1600(value));
+    return this;
+}
+```
+
+**使用方式**：
+```java
+Text text = ...;
+TextColor color = ...;
+
+// 调用声明方法，系统会根据当前版本自动选择正确的实现
+text.setColor(color);  // 1.16 以下调用 setColorV_1600，1.16+ 调用 setColorV1600
+```
+
+#### 重要规则
+
+1. **声明方法不能使用 `@WrapMethod` 等实现注解**
+   - 如果在声明方法上使用 `@WrapMethod` 等注解，Wrapper 系统会为其生成实现
+   - 这会与 `@SpecificImpl` 的特定实现产生冲突
+   - 声明方法只能写为纯声明或带方法体的 default 方法
+
+2. **声明方法可以使用开关注解**
+   - 可以在声明方法上使用 `@VersionRange`、`@Enabled` 等 `ElementSwitcher` 开关注解
+   - 这些注解用于控制声明方法本身是否启用
+   - 但不能使用 `@WrapMethod`、`@WrapFieldAccessor` 等实现类注解
+
+3. **参数类型必须一致**：特定实现方法的参数类型必须与声明方法完全一致
+
+4. **自动路由**：当调用声明方法时，系统会根据 `ElementSwitcher` 机制自动选择正确的特定实现
+
+5. **配合版本注解**：特定实现方法通常与 `@VersionRange`、`@Enabled` 等 `ElementSwitcher` 注解配合使用
+
+#### 错误示例
+
+```java
+// ❌ 错误：声明方法使用了 @WrapMethod
+@WrapMethod("setStyle")
+void setStyle(TextStyle style);
+
+// ❌ 错误：特定实现同时使用 @WrapMethod 和 default 实现
+@WrapMethod("setStyle")
+@SpecificImpl("setStyle")
+@VersionRange(end = 1900)
+default void setStyleV_1900(TextStyle style)
+{
+    // ...
+}
+```
+
+#### 正确示例
+
+```java
+// ✅ 正确：声明方法仅声明
+void setStyle(TextStyle style);
+
+// ✅ 正确：特定实现使用 default 实现
+@SpecificImpl("setStyle")
+@VersionRange(end = 1900)
+default void setStyleV_1900(TextStyle style)
+{
+    this.castTo(AbstractTextV_1900.FACTORY).setStyleV_1900(style);
+}
+
+// ✅ 正确：声明方法带 default 实现（但不能覆写 Object 方法）
+@VersionRange(begin = 1300)
+default String someMethod()
+{
+    return "default value";
+}
+```
+
+#### 特殊情况：WrapperObject.equals 的巧妙实现
+
+Java 的 interface 默认方法不能覆写 `Object` 的方法（如 `equals`、`hashCode`、`toString`）。WrapperObject 使用了巧妙的三层实现方式来解决这个问题。
+
+##### 三层结构
+
+```java
+// 第一层：声明方法（名义上 override Object 的 equals）
+@Override
+boolean equals(Object object);
+
+// 第二层：特定实现（处理类型检查和转换）
+@SpecificImpl("equals")
+default boolean equals$impl(Object object)
+{
+    if(this == object)
+        return true;
+    if(!(object instanceof WrapperObject))
+        return false;
+    return this.equals$impl((WrapperObject) object);
+}
+
+// 第三层：委托实现（自动拆包并调用被包装对象的 equals）
+@WrapMethod("equals")
+boolean equals$impl(WrapperObject object);
+```
+
+##### 工作原理
+
+1. **调用 `wrapper1.equals(wrapper2)`**
+   - 自动路由到 `equals$impl(Object object)`
+
+2. **类型检查和转换**
+   - 检查 `object` 是否为 `WrapperObject` 实例
+   - 如果是，转换为 `WrapperObject` 类型
+   - 调用重载的 `equals$impl(WrapperObject object)`
+
+3. **自动拆包和委托**
+   - `@WrapMethod("equals")` 会自动拆包参数
+   - 实际调用：`this.getWrapped().equals(object.getWrapped())`
+   - 比较被包装对象
+
+##### 巧妙之处
+
+- **符合直觉的用法**：`wrapper1.equals(wrapper2)` 比较包装对象，实际比较被包装对象
+- **类型安全**：先进行类型检查，确保比较的是两个 Wrapper 对象
+- **自动拆包**：`@WrapMethod` 自动处理参数拆包，无需手动调用 `getWrapped()`
+- **解决 Java 限制**：通过 `@SpecificImpl` 机制绕过了 interface 不能覆写 Object 方法的限制
+- **方法重载**：利用 Java 的方法重载机制，通过参数类型区分不同的实现
+
+##### 使用示例
+
+```java
+WrapperObject wrapper1 = WrapperObject.FACTORY.create(obj1);
+WrapperObject wrapper2 = WrapperObject.FACTORY.create(obj2);
+
+// 正确用法：比较两个 wrapper
+boolean result = wrapper1.equals(wrapper2);
+// 实际执行：obj1.equals(obj2)
+
+// 与非 Wrapper 对象比较
+boolean result2 = wrapper1.equals(obj1);
+// 返回 false（因为 obj1 不是 WrapperObject 实例）
+```
+
+这个设计展示了 `@SpecificImpl` 注解的强大功能，它不仅可以用于版本特定实现，还可以用于解决 Java 语言本身的限制。
+
+#### 工作原理
+
+1. Wrapper 系统在运行时扫描接口中的所有方法
+2. 找到带有 `@SpecificImpl` 注解的方法
+3. 根据 `ElementSwitcher` 机制（如 `@VersionRange`）判断哪些实现应该启用
+4. 将声明方法绑定到启用的实现上
+5. 调用声明方法时，自动路由到正确的实现
+
+这个机制使得 Wrapper 接口能够：
+- 覆盖 Object 的方法（`equals`、`hashCode`、`toString`）
+- 提供版本特定的方法实现
+- 保持类型安全和代码清晰
+
 ### Minecraft 专用注解
 
 Minecraft 模块提供了四个专用注解用于版本特定的包装，这些注解中的 `value` 字段是 `@VersionName` 注解数组，表示在各版本段的不同名称。
+
+**平台映射机制**：
+- 注解中的 `name` 字段使用的是 **Yarn 表（或旧版本的 legacy Yarn）的名称**
+- 运行时会根据**所在平台**进行自动映射：
+  - **Fabric 平台**：直接使用 Yarn 名称
+  - **Bukkit/Spigot/Paper 平台**：映射到 Mojang 映射
+  - **NeoForge 平台**：映射到 Mojang 映射
+  - **Vanilla 平台**：映射到 Mojang 映射
+- 这使得代码可以在不同平台间共享，而无需重复定义
 
 #### @WrapMinecraftClass
 ```java
@@ -714,6 +1152,11 @@ Minecraft 模块提供了四个专用注解用于版本特定的包装，这些�
 })
 public interface Window extends WrapperObject
 ```
+
+这里的 `"net.minecraft.screen.ScreenHandler"` 是 Yarn 映射中的名称，运行时会：
+- 在 Fabric 上：直接使用 `"net.minecraft.screen.ScreenHandler"`
+- 在 Bukkit 上：映射到 Mojang 映射（如 `"net.minecraft.world.inventory.Menu"`）
+- 在 NeoForge 上：映射到 Mojang 映射
 
 #### @WrapMinecraftMethod
 ```java
@@ -733,6 +1176,8 @@ int size();
 IngredientVanilla static$emptyV1200_2102();
 ```
 
+这里的 `"field_15680"` 和 `"EMPTY"` 是 Yarn 映射中的字段名，会根据平台自动映射。
+
 #### @WrapMinecraftInnerClass
 ```java
 @WrapMinecraftInnerClass(outer = FontDescriptionV2109.class, name = @VersionName(name = "Font"))
@@ -744,6 +1189,7 @@ interface Resource extends FontDescriptionV2109
 - 单元素数组可以省略花括号
 - `@VersionName` 支持版本范围（`begin`、`end`）和自动重映射（`remap`）
 - 通过 `@VersionName` 数组可以处理类名、方法名、字段名在不同版本间的变化
+- **注解中的名称始终使用 Yarn 映射**（包括 legacy Yarn），系统会自动根据当前平台进行转换
 
 ### 5.5 数据包监听
 支持服务端和客户端数据包监听：
@@ -988,5 +1434,34 @@ open build/reports/build/index.html  # macOS
 - 临时性的调试信息
 - 与项目无关的通用知识
 
-### 11.2 示例
+### 11.2 自动更新规则
+当用户要求"自动更新 IFLOW.md 而无需询问"时，应当直接更新 IFLOW.md 文件，不需要先询问用户确认。这适用于：
+- 用户明确要求更新文档时
+- 用户纠正错误并要求更新时
+- 用户说"包括此规则"等包含性语句时
+- 用户说"记住这个问题"时，应当立即记录到 IFLOW.md 中
+- 用户说"叫你记住这个问题你没明白吗"等强调性语句时，必须立即记录
+
+**重要原则**：总是自动记录重要信息到 IFLOW.md，不要等待用户再次提醒。当用户提到需要记住的规则、约定或重要信息时，应该立即更新 IFLOW.md，而不是等到下次需要时才想起来。
+
+### 11.3 示例
 当用户说"以后我教你新的内容你也应当更新到此md文件中"时，这个规则本身也应该被记录到 IFLOW.md 中（即本章）。
+
+### 11.4 Typst 文档链接规则
+在编写 Typst 文档时，使用 `#link()` 创建链接时必须省略 `.typ` 后缀，因为编译后文件是 HTML 格式。
+
+**错误示例**：
+```typst
+#link("specific_impl.typ")[版本特定实现]
+```
+
+**正确示例**：
+```typst
+#link("specific_impl")[版本特定实现]
+```
+
+**原因**：
+- Typst 源文件使用 `.typ` 后缀
+- 编译后生成 HTML 文件
+- 链接应该指向编译后的 HTML 文件，而不是源文件
+- Typst 会自动处理文件扩展名
