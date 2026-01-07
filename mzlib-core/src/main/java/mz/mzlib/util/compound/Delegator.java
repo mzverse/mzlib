@@ -1,6 +1,6 @@
 package mz.mzlib.util.compound;
 
-import io.github.karlatemp.unsafeaccessor.Root;
+import moe.karla.usf.unsafe.Unsafe;
 import mz.mzlib.util.RuntimeUtil;
 import mz.mzlib.util.wrapper.*;
 
@@ -25,7 +25,7 @@ public interface Delegator extends WrapperObject
     {
         try
         {
-            T result = factory.create(Root.getUnsafe().allocateInstance(factory.getStatic().static$getWrappedClass()));
+            T result = factory.create(Unsafe.getUnsafe().allocateInstance(factory.getStatic().static$getWrappedClass()));
             result.setDelegate(delegate);
             return result;
         }

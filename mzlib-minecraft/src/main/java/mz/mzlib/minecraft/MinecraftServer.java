@@ -17,7 +17,6 @@ import mz.mzlib.util.async.AsyncFunctionRunner;
 import mz.mzlib.util.async.BasicAwait;
 import mz.mzlib.util.proxy.IteratorProxy;
 import mz.mzlib.util.wrapper.SpecificImpl;
-import mz.mzlib.util.wrapper.WrapperCreator;
 import mz.mzlib.util.wrapper.WrapperFactory;
 import mz.mzlib.util.wrapper.WrapperObject;
 
@@ -33,16 +32,13 @@ import java.util.function.BooleanSupplier;
 public interface MinecraftServer extends WrapperObject, CommandOutput, Instance, AsyncFunctionRunner
 {
     WrapperFactory<MinecraftServer> FACTORY = WrapperFactory.of(MinecraftServer.class);
-    @Deprecated
-    @WrapperCreator
-    static MinecraftServer create(Object wrapped)
-    {
-        return WrapperObject.create(MinecraftServer.class, wrapped);
-    }
 
     MinecraftServer instance = RuntimeUtil.nul();
 
-    @WrapMinecraftFieldAccessor(@VersionName(name = "serverThread"))
+    @WrapMinecraftFieldAccessor({
+        @VersionName(name = "serverThread", end = 2601),
+        @VersionName(name = "serverThread", remap = false, begin = 2601)
+    })
     Thread getThread();
 
     Iterable<WorldServer> getWorlds();
@@ -52,14 +48,18 @@ public interface MinecraftServer extends WrapperObject, CommandOutput, Instance,
         return this.getPlayerManager().getPlayers();
     }
 
-    @WrapMinecraftMethod(@VersionName(name = "getPlayerManager"))
+    @WrapMinecraftMethod({
+        @VersionName(name = "getPlayerManager", end = 2601),
+        @VersionName(name = "getPlayerList", remap = false, begin = 2601)
+    })
     PlayerManager getPlayerManager();
 
     @WrapMinecraftMethod(
         {
             @VersionName(name = "getCommandManager", end = 1300),
             @VersionName(name = "method_2971", begin = 1300, end = 1400),
-            @VersionName(name = "getCommandManager", begin = 1400)
+            @VersionName(name = "getCommandManager", begin = 1400, end = 2601),
+            @VersionName(name = "getCommands", remap = false, begin = 2601)
         }
     )
     CommandManager getCommandManager();
@@ -71,7 +71,11 @@ public interface MinecraftServer extends WrapperObject, CommandOutput, Instance,
 
     @MinecraftPlatform.Disabled(MinecraftPlatform.Tag.FOLIA)
     @VersionRange(begin = 1300)
-    @WrapMinecraftMethod({ @VersionName(name = "method_20324", end = 1400), @VersionName(name = "tick", begin = 1400) })
+    @WrapMinecraftMethod({
+        @VersionName(name = "method_20324", end = 1400),
+        @VersionName(name = "tick", begin = 1400, end = 2601),
+        @VersionName(name = "tickServer", remap = false, begin = 2601)
+    })
     void tickV1300(BooleanSupplier booleanSupplier);
 
     Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
@@ -107,12 +111,11 @@ public interface MinecraftServer extends WrapperObject, CommandOutput, Instance,
     DataUpdaterV900_1300 getDataUpdaterV900_1300();
 
     @VersionRange(begin = 1300)
-    @WrapMinecraftFieldAccessor(
-        {
-            @VersionName(name = "field_21612", end = 1400),
-            @VersionName(name = "dataFixer", begin = 1400)
-        }
-    )
+    @WrapMinecraftFieldAccessor({
+        @VersionName(name = "field_21612", end = 1400),
+        @VersionName(name = "dataFixer", begin = 1400, end = 2601),
+        @VersionName(name = "fixerUpper", remap = false, begin = 2601)
+    })
     DataFixerV1300 getDataUpdaterV1300();
 
     /**
@@ -174,23 +177,31 @@ public interface MinecraftServer extends WrapperObject, CommandOutput, Instance,
     RegistryManagerV1602 getRegistriesV1602_1802();
 
     @SpecificImpl("getRegistriesV1602")
-    @WrapMinecraftMethod(@VersionName(name = "getRegistryManager", begin = 1802))
+    @WrapMinecraftMethod({
+        @VersionName(name = "getRegistryManager", begin = 1802, end = 2601),
+        @VersionName(name = "registryAccess", remap = false, begin = 2601)
+    })
     RegistryManagerV1602.Immutable getRegistriesV1802();
 
     @VersionRange(begin = 1300)
-    @WrapMinecraftMethod(
-        {
-            @VersionName(name = "method_20331", end = 1400),
-            @VersionName(name = "getRecipeManager", begin = 1400)
-        }
-    )
+    @WrapMinecraftMethod({
+        @VersionName(name = "method_20331", end = 1400),
+        @VersionName(name = "getRecipeManager", remap = false, begin = 1400)
+    })
     RecipeManager getRecipeManagerV1300();
 
     @VersionRange(begin = 1600)
-    @WrapMinecraftMethod(@VersionName(name = "getSaveProperties"))
+    @WrapMinecraftMethod({
+        @VersionName(name = "getSaveProperties", end = 2601),
+        @VersionName(name = "getWorldData", remap = false, begin = 2601)
+    })
     SavePropertiesV1600 getSavePropertiesV1600();
 
-    @WrapMinecraftMethod({ @VersionName(name = "run", end = 1601), @VersionName(name = "method_29741", begin = 1601) })
+    @WrapMinecraftMethod({
+        @VersionName(name = "run", end = 1601),
+        @VersionName(name = "method_29741", begin = 1601, end = 2601),
+        @VersionName(name = "runServer", remap = false, begin = 2601)
+    })
     void run();
 
     @VersionRange(end = 1904)
@@ -203,15 +214,17 @@ public interface MinecraftServer extends WrapperObject, CommandOutput, Instance,
     void setFaviconV_1904(ServerMetadata metadata);
 
     @VersionRange(begin = 1904)
-    @WrapMinecraftMethod(@VersionName(name = "createMetadata"))
+    @WrapMinecraftMethod({
+        @VersionName(name = "createMetadata", end = 2601),
+        @VersionName(name = "buildServerStatus", remap = false, begin = 2601)
+    })
     ServerMetadata createMetadataV1904();
 
-    @WrapMinecraftMethod(
-        {
-            @VersionName(name = "stopServer", end = 1400),
-            @VersionName(name = "shutdown", begin = 1400)
-        }
-    )
+    @WrapMinecraftMethod({
+        @VersionName(name = "stopServer", end = 1400),
+        @VersionName(name = "shutdown", begin = 1400, end = 2601),
+        @VersionName(name = "stopServer", remap = false, begin = 2601)
+    })
     void onStop();
 
 
@@ -231,11 +244,10 @@ public interface MinecraftServer extends WrapperObject, CommandOutput, Instance,
         return IteratorProxy.iterable(this.getWorlds0V1300(), FunctionInvertible.wrapper(WorldServer.FACTORY));
     }
     @VersionRange(begin = 1300)
-    @WrapMinecraftMethod(
-        {
-            @VersionName(name = "method_20351", end = 1400),
-            @VersionName(name = "getWorlds", begin = 1400)
-        }
-    )
+    @WrapMinecraftMethod({
+        @VersionName(name = "method_20351", end = 1400),
+        @VersionName(name = "getWorlds", begin = 1400, end = 2601),
+        @VersionName(name = "getAllLevels", remap = false, begin = 2601)
+    })
     Iterable<Object> getWorlds0V1300();
 }

@@ -21,7 +21,7 @@ public class ModuleFurnaceUpdateV_1300 extends MzModule
     {
         event.sync(() ->
         {
-            if(event.getActionType().equals(WindowActionType.shiftClick()) &&
+            if(event.getActionType().equals(WindowActionType.SHIFT_CLICK) &&
                 event.getPlayer().getCurrentWindow().is(WindowFurnace.FACTORY))
                 MinecraftServer.instance.schedule(event.getPlayer()::updateWindow);
         });

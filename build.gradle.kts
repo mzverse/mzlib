@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.gradle.internal.extensions.stdlib.toDefaultLowerCase
 
 plugins {
@@ -235,6 +236,18 @@ subprojects {
         }
     }
 
+    dependencies {
+        testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    }
+    testing {
+        suites {
+            val test by getting(JvmTestSuite::class) {
+                useJUnitJupiter()
+            }
+        }
+    }
+
     tasks {
         register<Copy>("copyBinaryResources") {
             from("src/main/resources") {
@@ -258,6 +271,7 @@ subprojects {
         }
         shadowJar {
             destinationDirectory = outputDir
+            transform(ServiceFileTransformer::class.java)
         }
         build {
             dependsOn(shadowJar)

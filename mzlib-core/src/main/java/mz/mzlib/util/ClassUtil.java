@@ -1,6 +1,7 @@
 package mz.mzlib.util;
 
-import io.github.karlatemp.unsafeaccessor.Root;
+import moe.karla.usf.root.RootAccess;
+import moe.karla.usf.unsafe.Unsafe;
 import mz.mzlib.asm.ClassWriter;
 import mz.mzlib.asm.Opcodes;
 import mz.mzlib.asm.tree.ClassNode;
@@ -34,7 +35,7 @@ public class ClassUtil
     public static ClassLoader extClassLoader = sysClassLoader.getParent();
 
     private static final MethodHandle method$Class$getName = RuntimeUtil.sneakilyRun(
-        () -> Root.getTrusted(Class.class).findVirtual(Class.class, "getName", MethodType.methodType(String.class)));
+        () -> RootAccess.getTrustedLookupIn(Class.class).findVirtual(Class.class, "getName", MethodType.methodType(String.class)));
     public static String getName(Class<?> clazz)
     {
         try
@@ -195,7 +196,7 @@ public class ClassUtil
     {
         try
         {
-            return Root.getTrusted(declaringClass)
+            return RootAccess.getTrustedLookupIn(declaringClass)
                 .findConstructor(declaringClass, MethodType.methodType(void.class, parameterTypes));
         }
         catch(IllegalAccessException e)
@@ -214,10 +215,10 @@ public class ClassUtil
         try
         {
             if(isStatic)
-                return Root.getTrusted(declaringClass)
+                return RootAccess.getTrustedLookupIn(declaringClass)
                     .findStatic(declaringClass, name, MethodType.methodType(returnType, parameterTypes));
             else
-                return Root.getTrusted(declaringClass)
+                return RootAccess.getTrustedLookupIn(declaringClass)
                     .findVirtual(declaringClass, name, MethodType.methodType(returnType, parameterTypes));
         }
         catch(IllegalAccessException e)
@@ -234,7 +235,7 @@ public class ClassUtil
     {
         try
         {
-            return Root.getTrusted(declaringClass)
+            return RootAccess.getTrustedLookupIn(declaringClass)
                 .findSpecial(declaringClass, name, MethodType.methodType(returnType, parameterTypes), declaringClass);
         }
         catch(IllegalAccessException e)
@@ -249,9 +250,9 @@ public class ClassUtil
         try
         {
             if(isStatic)
-                return Root.getTrusted(declaringClass).findStaticGetter(declaringClass, name, type);
+                return RootAccess.getTrustedLookupIn(declaringClass).findStaticGetter(declaringClass, name, type);
             else
-                return Root.getTrusted(declaringClass).findGetter(declaringClass, name, type);
+                return RootAccess.getTrustedLookupIn(declaringClass).findGetter(declaringClass, name, type);
         }
         catch(IllegalAccessException e)
         {
@@ -271,11 +272,11 @@ public class ClassUtil
         {
             if(isStatic)
             {
-                return Root.getTrusted(declaringClass).findStaticSetter(declaringClass, name, type);
+                return RootAccess.getTrustedLookupIn(declaringClass).findStaticSetter(declaringClass, name, type);
             }
             else
             {
-                return Root.getTrusted(declaringClass).findSetter(declaringClass, name, type);
+                return RootAccess.getTrustedLookupIn(declaringClass).findSetter(declaringClass, name, type);
             }
         }
         catch(IllegalAccessException e)
@@ -293,7 +294,7 @@ public class ClassUtil
     {
         try
         {
-            return Root.getTrusted(constructor.getDeclaringClass()).unreflectConstructor(constructor);
+            return RootAccess.getTrustedLookupIn(constructor.getDeclaringClass()).unreflectConstructor(constructor);
         }
         catch(IllegalAccessException e)
         {
@@ -305,7 +306,7 @@ public class ClassUtil
     {
         try
         {
-            return Root.getTrusted(field.getDeclaringClass()).unreflectGetter(field);
+            return RootAccess.getTrustedLookupIn(field.getDeclaringClass()).unreflectGetter(field);
         }
         catch(IllegalAccessException e)
         {
@@ -317,7 +318,7 @@ public class ClassUtil
     {
         try
         {
-            return Root.getTrusted(field.getDeclaringClass()).unreflectSetter(field);
+            return RootAccess.getTrustedLookupIn(field.getDeclaringClass()).unreflectSetter(field);
         }
         catch(IllegalAccessException e)
         {
@@ -329,7 +330,7 @@ public class ClassUtil
     {
         try
         {
-            return Root.getTrusted(method.getDeclaringClass()).unreflect(method);
+            return RootAccess.getTrustedLookupIn(method.getDeclaringClass()).unreflect(method);
         }
         catch(IllegalAccessException e)
         {
@@ -341,7 +342,7 @@ public class ClassUtil
     {
         try
         {
-            return Root.getTrusted(method.getDeclaringClass()).unreflectSpecial(method, method.getDeclaringClass());
+            return RootAccess.getTrustedLookupIn(method.getDeclaringClass()).unreflectSpecial(method, method.getDeclaringClass());
         }
         catch(IllegalAccessException e)
         {
@@ -506,7 +507,7 @@ public class ClassUtil
                     {
                         try
                         {
-                            return Root.getUnsafe().defineClass(name, byteCode, 0, byteCode.length, classLoader, null);
+                            return Unsafe.getUnsafe().defineClass(name, byteCode, 0, byteCode.length, classLoader, null);
                         }
                         catch(Throwable e1)
                         {

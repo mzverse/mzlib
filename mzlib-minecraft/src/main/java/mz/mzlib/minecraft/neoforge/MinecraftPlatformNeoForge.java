@@ -72,9 +72,14 @@ public class MinecraftPlatformNeoForge implements MinecraftPlatform
         {
             File folder = new File(getMzLibDataFolder(), "mappings");
             List<Mappings<?>> result = new ArrayList<>();
-            result.add(new MinecraftMappingsFetcherMojang().fetch(getVersionString(), folder));
-            result.add(new MinecraftMappingsFetcherYarnIntermediary().fetch(getVersionString(), folder));
-            result.add(new MinecraftMappingsFetcherYarn().fetch(getVersionString(), folder));
+            String versionString;
+            if(this.getVersion() < 2601)
+                versionString = this.getVersionString();
+            else
+                versionString = "1.21.11";
+            result.add(new MinecraftMappingsFetcherMojang().fetch(versionString, folder));
+            result.add(new MinecraftMappingsFetcherYarnIntermediary().fetch(versionString, folder));
+            result.add(new MinecraftMappingsFetcherYarn().fetch(versionString, folder));
             return this.mappings = new MappingsPipe(result);
         }
         catch(Throwable e)

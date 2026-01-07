@@ -1,6 +1,6 @@
 package mz.mzlib.minecraft.bukkit.command;
 
-import io.github.karlatemp.unsafeaccessor.Root;
+import moe.karla.usf.unsafe.Unsafe;
 import mz.mzlib.minecraft.MinecraftPlatform;
 import mz.mzlib.minecraft.VersionName;
 import mz.mzlib.minecraft.VersionRange;
@@ -23,7 +23,7 @@ public interface CraftCommandVanillaWrapper extends WrapperObject
     }
 
     CraftCommandVanillaWrapper unsafe = RuntimeUtil.sneakilyRun(
-        () -> create(Root.getUnsafe().allocateInstance(FACTORY.getStatic().static$getWrappedClass())));
+        () -> create(Unsafe.getUnsafe().allocateInstance(FACTORY.getStatic().static$getWrappedClass())));
 
     static CommandSource toCommandSource(CommandSender object)
     {

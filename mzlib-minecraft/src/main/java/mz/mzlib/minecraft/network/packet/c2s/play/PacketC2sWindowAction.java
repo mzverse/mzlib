@@ -35,13 +35,12 @@ public interface PacketC2sWindowAction extends Packet
     @WrapMinecraftFieldAccessor(@VersionName(name = "syncId"))
     int getSyncId();
 
-    @WrapMinecraftFieldAccessor(
-        {
-            @VersionName(name = "actionType", end = 900),
-            @VersionName(name = "field_13798", begin = 900, end = 1400),
-            @VersionName(name = "actionType", begin = 1400)
-        }
-    )
+    @WrapMinecraftFieldAccessor({
+        @VersionName(name = "actionType", end = 900),
+        @VersionName(name = "field_13798", begin = 900, end = 1400),
+        @VersionName(name = "actionType", begin = 1400, end = 2601),
+        @VersionName(name = "containerInput", remap = false, begin = 2601)
+    })
     WindowActionType getActionType();
 
     @WrapMinecraftFieldAccessor(@VersionName(name = "slot"))

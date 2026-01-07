@@ -191,7 +191,7 @@ public interface Item extends WrapperObject
 
     @VersionRange(begin = 1300)
     @WrapSameClass(Item.class)
-    interface V1300 extends WrapperObject, Item, ItemConvertibleV1300
+    interface V1300 extends Item, ItemConvertibleV1300
     {
         WrapperFactory<V1300> FACTORY = WrapperFactory.of(V1300.class);
     }

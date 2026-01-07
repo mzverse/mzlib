@@ -135,11 +135,11 @@ public class UiWindowList<T> extends UiWindowControlReadOnly
             for(int index : indexOrNone)
             {
                 Option<Consumer<Entry<T>>> handler = Option.none();
-                if(action.getType().equals(WindowActionType.click()) && action.getData() == 0)
+                if(action.getType().equals(WindowActionType.CLICK) && action.getData() == 0)
                     handler = this.viewer;
-                else if(action.getType().equals(WindowActionType.shiftClick()) && action.getData() == 0)
+                else if(action.getType().equals(WindowActionType.SHIFT_CLICK) && action.getData() == 0)
                     handler = this.remover;
-                else if(action.getType().equals(WindowActionType.click()) && action.getData() == 1)
+                else if(action.getType().equals(WindowActionType.CLICK) && action.getData() == 1)
                 {
                     if(this.insertable)
                         handler = this.adder;

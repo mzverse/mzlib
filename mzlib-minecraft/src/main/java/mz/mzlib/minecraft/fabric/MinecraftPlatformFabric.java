@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MinecraftPlatformFabric implements MinecraftPlatform
 {
@@ -30,8 +32,12 @@ public class MinecraftPlatformFabric implements MinecraftPlatform
     {
         if(this.versionString != null)
             return this.versionString;
-        return this.versionString = FabricLoader.getInstance().getModContainer("minecraft")
+        this.versionString = FabricLoader.getInstance().getModContainer("minecraft")
             .orElseThrow(AssertionError::new).getMetadata().getVersion().getFriendlyString();
+        Matcher matcher = Pattern.compile("(?<version>\\d+\\.\\d+(\\.\\d+)?)-alpha\\.(?<snapshot>\\d+)").matcher(this.versionString);
+        if(matcher.matches())
+            this.versionString = matcher.group("version") + "-snapshot-" + matcher.group("snapshot");
+        return this.versionString;
     }
     @Override
     public int getVersion()
@@ -70,6 +76,14 @@ public class MinecraftPlatformFabric implements MinecraftPlatform
         if(this.mappings != null)
             return this.mappings;
         File folder = new File(getMzLibDataFolder(), "mappings");
-        return this.mappings = new MinecraftMappingsFetcherYarn().fetch(getVersionString(), folder);
+        if(this.getVersion() < 2601)
+            this.mappings = new MinecraftMappingsFetcherYarn().fetch(getVersionString(), folder);
+        else
+            this.mappings = new MappingsPipe(
+                new MinecraftMappingsFetcherMojang().fetch("1.21.11", folder),
+                new MinecraftMappingsFetcherYarnIntermediary().fetch("1.21.11", folder),
+                new MinecraftMappingsFetcherYarn().fetch("1.21.11", folder)
+            );
+        return this.mappings;
     }
 }

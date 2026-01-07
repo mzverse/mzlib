@@ -18,8 +18,6 @@ import mz.mzlib.minecraft.entity.player.Hand;
 import mz.mzlib.minecraft.i18n.MinecraftI18n;
 import mz.mzlib.minecraft.incomprehensible.TypedActionResultV900_2102;
 import mz.mzlib.minecraft.nbt.*;
-import mz.mzlib.minecraft.registry.entry.RegistryEntryListV1903;
-import mz.mzlib.minecraft.registry.tag.TagKeyV1903;
 import mz.mzlib.minecraft.serialization.CodecV1600;
 import mz.mzlib.minecraft.serialization.DynamicV1300;
 import mz.mzlib.minecraft.text.Text;
@@ -401,18 +399,6 @@ public interface ItemStack extends WrapperObject
     {
         return FACTORY.getStatic().static$isStackable(a, b);
     }
-
-    @VersionRange(begin = 1700)
-    @WrapMinecraftMethod(@VersionName(name = "method_31574"))
-    boolean isOfV1700(Item item);
-
-    @VersionRange(begin = 1903)
-    @WrapMinecraftMethod(@VersionName(name = "isIn"))
-    boolean hasTagV1903(TagKeyV1903<?> tag);
-
-    @VersionRange(begin = 2002)
-    @WrapMinecraftMethod(@VersionName(name = "method_53187"))
-    boolean isInV2002(RegistryEntryListV1903 registryEntries);
 
     @VersionRange(end = 900)
     @WrapMinecraftMethod(@VersionName(name = "onStartUse"))

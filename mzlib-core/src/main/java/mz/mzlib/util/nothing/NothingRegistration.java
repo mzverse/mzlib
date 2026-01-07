@@ -1,6 +1,6 @@
 package mz.mzlib.util.nothing;
 
-import io.github.karlatemp.unsafeaccessor.Root;
+import moe.karla.usf.root.RootAccess;
 import mz.mzlib.asm.ClassReader;
 import mz.mzlib.asm.ClassWriter;
 import mz.mzlib.asm.Handle;
@@ -148,7 +148,7 @@ public class NothingRegistration
                 continue;
             int nothingConstructor = callSites.size();
             callSites.add(WrapperObject.getConstructorCallSite(
-                Root.getTrusted(nothing), "create",
+                RootAccess.getTrustedLookupIn(nothing), "create",
                 MethodType.methodType(Object.class, Object.class), RuntimeUtil.cast(nothing)
             ));
             for(Method i : nothing.getDeclaredMethods())
@@ -255,7 +255,7 @@ public class NothingRegistration
                                             ));
                                             callSites.add(
                                                 WrapperObject.getConstructorCallSite(
-                                                    Root.getTrusted(paramTypes[k]), "create",
+                                                    RootAccess.getTrustedLookupIn(paramTypes[k]), "create",
                                                     MethodType.methodType(Object.class, Object.class),
                                                     RuntimeUtil.cast(paramTypes[k])
                                                 ));
@@ -296,7 +296,7 @@ public class NothingRegistration
                                             ));
                                             callSites.add(
                                                 WrapperObject.getConstructorCallSite(
-                                                    Root.getTrusted(paramTypes[k]), "create",
+                                                    RootAccess.getTrustedLookupIn(paramTypes[k]), "create",
                                                     MethodType.methodType(Object.class, Object.class),
                                                     RuntimeUtil.cast(paramTypes[k])
                                                 ));
@@ -331,7 +331,7 @@ public class NothingRegistration
                                             ));
                                             callSites.add(
                                                 WrapperObject.getConstructorCallSite(
-                                                    Root.getTrusted(paramTypes[k]), "create",
+                                                    RootAccess.getTrustedLookupIn(paramTypes[k]), "create",
                                                     MethodType.methodType(Object.class, Object.class),
                                                     RuntimeUtil.cast(paramTypes[k])
                                                 ));

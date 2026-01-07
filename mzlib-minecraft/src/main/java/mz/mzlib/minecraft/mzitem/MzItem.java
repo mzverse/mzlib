@@ -15,8 +15,6 @@ import mz.mzlib.minecraft.nbt.NbtCompound;
 import mz.mzlib.minecraft.recipe.IngredientVanilla;
 import mz.mzlib.minecraft.recipe.crafting.RecipeCraftingShapedVanilla;
 import mz.mzlib.minecraft.recipe.crafting.RecipeCraftingShapelessVanilla;
-import mz.mzlib.minecraft.registry.entry.RegistryEntryListV1903;
-import mz.mzlib.minecraft.registry.tag.TagKeyV1903;
 import mz.mzlib.minecraft.text.Text;
 import mz.mzlib.minecraft.world.World;
 import mz.mzlib.module.MzModule;
@@ -29,7 +27,6 @@ import mz.mzlib.util.nothing.NothingInject;
 import mz.mzlib.util.nothing.NothingInjectType;
 import mz.mzlib.util.wrapper.CallOnce;
 import mz.mzlib.util.wrapper.WrapSameClass;
-import mz.mzlib.util.wrapper.WrapperFactory;
 import mz.mzlib.util.wrapper.basic.Wrapper_boolean;
 
 import java.util.Collections;
@@ -146,7 +143,6 @@ public interface MzItem extends ItemStack
                 .reviserGetter(o -> o.map(NbtCompound::clone).unwrapOrGet(NbtCompound::newInstance))
                 .reviserApplier(data -> Option.some(data).filter(ThrowablePredicate.of(NbtCompound::isEmpty).negate()))
                 .register(this);
-            this.register(NothingItemStack.class);
             this.register(NothingIngredientVanilla.class);
             this.registerIfEnabled(NothingRecipeCraftingShapedVanillaV_1200.class);
 
@@ -168,44 +164,14 @@ public interface MzItem extends ItemStack
             }
         }
 
-        @WrapSameClass(ItemStack.class)
-        public interface NothingItemStack extends Nothing, ItemStack
+        static Wrapper_boolean handleVanilla(ItemStack is)
         {
-            WrapperFactory<NothingItemStack> FACTORY = WrapperFactory.of(NothingItemStack.class);
-
-            default Wrapper_boolean handleVanilla()
+            for(MzItem mzItem : RegistrarMzItem.instance.toMzItem(is))
             {
-                for(MzItem mzItem : RegistrarMzItem.instance.toMzItem(this))
-                {
-                    if(!mzItem.isVanilla())
-                        return Wrapper_boolean.FACTORY.create(false);
-                }
-                return Nothing.notReturn();
+                if(!mzItem.isVanilla())
+                    return Wrapper_boolean.FACTORY.create(false);
             }
-
-            @VersionRange(begin = 1903)
-            @NothingInject(
-                wrapperMethodName = "hasTagV1903",
-                wrapperMethodParams = { TagKeyV1903.class },
-                locateMethod = "",
-                type = NothingInjectType.INSERT_BEFORE
-            )
-            default Wrapper_boolean hasTagV1903$begin()
-            {
-                return this.handleVanilla();
-            }
-
-            @VersionRange(begin = 2002)
-            @NothingInject(
-                wrapperMethodName = "isInV2002",
-                wrapperMethodParams = { RegistryEntryListV1903.class },
-                locateMethod = "",
-                type = NothingInjectType.INSERT_BEFORE
-            )
-            default Wrapper_boolean isInV2002$begin()
-            {
-                return this.handleVanilla();
-            }
+            return Nothing.notReturn();
         }
         @WrapSameClass(IngredientVanilla.class)
         public interface NothingIngredientVanilla extends Nothing, IngredientVanilla
@@ -219,7 +185,7 @@ public interface MzItem extends ItemStack
             )
             default Wrapper_boolean testV1200$begin(@LocalVar(1) ItemStack itemStack)
             {
-                return itemStack.as(NothingItemStack.FACTORY).handleVanilla();
+                return handleVanilla(itemStack);
             }
         }
 
@@ -227,7 +193,7 @@ public interface MzItem extends ItemStack
         {
             for(int size = inventory.size(), i = 0; i < size; i++)
             {
-                Wrapper_boolean result = inventory.getItemStack(i).as(NothingItemStack.FACTORY).handleVanilla();
+                Wrapper_boolean result = handleVanilla(inventory.getItemStack(i));
                 if(Nothing.isReturn(result))
                     return result;
             }

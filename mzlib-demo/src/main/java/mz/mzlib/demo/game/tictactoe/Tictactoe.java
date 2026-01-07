@@ -182,24 +182,28 @@ public class Tictactoe extends MzModule
                 if(action.getIndex() >= 0 && action.getIndex() < this.inventory.size())
                     window.sendSlotUpdate(action.getPlayer(), action.getIndex());
             }
-            else if(!this.finished &&
-                (action.getType().equals(WindowActionType.click()) || action.getType().equals(WindowActionType.shiftClick())) &&
-                action.getIndex() >= 1 && action.getIndex() < 10 && this.inventory.getItemStack(action.getIndex()).isEmpty())
+            else
             {
-                this.inventory.setItemStack(action.getIndex(), PLAYER);
-                if(checkWin())
+                if(!this.finished && (action.getType().equals(WindowActionType.CLICK) ||
+                    action.getType().equals(WindowActionType.SHIFT_CLICK)) &&
+                    action.getIndex() >= 1 && action.getIndex() < 10 &&
+                    this.inventory.getItemStack(action.getIndex()).isEmpty())
                 {
-                    this.finished = true;
-                    this.inventory.setItemStack(
-                        0, ((ItemStack) Demo.instance.config.get("game.tictactoe.reward")).copy());
-                    action.getPlayer().closeInterface();
-                    this.open(action.getPlayer());
-                }
-                else
-                {
-                    aiDrop();
-                    if(this.checkWin())
+                    this.inventory.setItemStack(action.getIndex(), PLAYER);
+                    if(checkWin())
+                    {
                         this.finished = true;
+                        this.inventory.setItemStack(
+                            0, ((ItemStack) Demo.instance.config.get("game.tictactoe.reward")).copy());
+                        action.getPlayer().closeInterface();
+                        this.open(action.getPlayer());
+                    }
+                    else
+                    {
+                        aiDrop();
+                        if(this.checkWin())
+                            this.finished = true;
+                    }
                 }
             }
         }

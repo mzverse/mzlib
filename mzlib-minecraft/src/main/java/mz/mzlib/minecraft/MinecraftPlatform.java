@@ -48,8 +48,12 @@ public interface MinecraftPlatform extends Instance
 
     static int parseVersion(String version)
     {
+        version = version.split("-")[0];
         String[] versions = version.split("\\.", -1);
-        return Integer.parseInt(versions[1]) * 100 + (versions.length > 2 ? Integer.parseInt(versions[2]) : 0);
+        if(versions[0].equals("1"))
+            return Integer.parseInt(versions[1]) * 100 + (versions.length > 2 ? Integer.parseInt(versions[2]) : 0);
+        else
+            return Integer.parseInt(versions[0]) * 100 + Integer.parseInt(versions[1]);
     }
 
     class Tag
