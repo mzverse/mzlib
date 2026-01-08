@@ -2,7 +2,6 @@ package mz.mzlib.minecraft.wrapper;
 
 import mz.mzlib.minecraft.MinecraftPlatform;
 import mz.mzlib.minecraft.VersionName;
-import mz.mzlib.util.ClassUtil;
 import mz.mzlib.util.ElementSwitcher;
 import mz.mzlib.util.ElementSwitcherClass;
 import mz.mzlib.util.RuntimeUtil;
@@ -73,7 +72,7 @@ public @interface WrapMinecraftFieldAccessor
                                     return new String[]{
                                         MinecraftPlatform.instance.getMappings().inverse().mapField(
                                             MinecraftPlatform.instance.getMappings().mapClass(
-                                                ClassUtil.getName(WrapperObject.getWrappedClass(wrapperClass))),
+                                                WrapperObject.getWrappedClass(wrapperClass).getName()),
                                             name.name()
                                         )
                                     };

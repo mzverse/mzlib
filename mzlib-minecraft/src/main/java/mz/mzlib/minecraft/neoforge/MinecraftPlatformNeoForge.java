@@ -8,9 +8,7 @@ import mz.mzlib.util.RuntimeUtil;
 import net.neoforged.fml.ModList;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 public class MinecraftPlatformNeoForge implements MinecraftPlatform
@@ -68,19 +66,17 @@ public class MinecraftPlatformNeoForge implements MinecraftPlatform
     {
         if(this.mappings != null)
             return this.mappings;
+        File folder = new File(getMzLibDataFolder(), "mappings");
+        if(this.getVersion() >= 2601)
+            return this.mappings = MinecraftPlatform.getMappingsV2601(folder);
         try
         {
-            File folder = new File(getMzLibDataFolder(), "mappings");
-            List<Mappings<?>> result = new ArrayList<>();
-            String versionString;
-            if(this.getVersion() < 2601)
-                versionString = this.getVersionString();
-            else
-                versionString = "1.21.11";
-            result.add(new MinecraftMappingsFetcherMojang().fetch(versionString, folder));
-            result.add(new MinecraftMappingsFetcherYarnIntermediary().fetch(versionString, folder));
-            result.add(new MinecraftMappingsFetcherYarn().fetch(versionString, folder));
-            return this.mappings = new MappingsPipe(result);
+            String versionString = this.getVersionString();
+            return this.mappings = new MappingsPipe(
+                new MinecraftMappingsFetcherMojang().fetch(versionString, folder),
+                new MinecraftMappingsFetcherYarnIntermediary().fetch(versionString, folder),
+                new MinecraftMappingsFetcherYarn().fetch(versionString, folder)
+            );
         }
         catch(Throwable e)
         {

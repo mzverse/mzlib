@@ -79,11 +79,7 @@ public class MinecraftPlatformFabric implements MinecraftPlatform
         if(this.getVersion() < 2601)
             this.mappings = new MinecraftMappingsFetcherYarn().fetch(getVersionString(), folder);
         else
-            this.mappings = new MappingsPipe(
-                new MinecraftMappingsFetcherMojang().fetch("1.21.11", folder),
-                new MinecraftMappingsFetcherYarnIntermediary().fetch("1.21.11", folder),
-                new MinecraftMappingsFetcherYarn().fetch("1.21.11", folder)
-            );
+            this.mappings = MinecraftPlatform.getMappingsV2601(folder);
         return this.mappings;
     }
 }

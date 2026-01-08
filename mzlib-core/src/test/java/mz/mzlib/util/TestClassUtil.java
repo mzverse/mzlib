@@ -12,8 +12,8 @@ public class TestClassUtil
     @Test
     void getName$test()
     {
-        String nameObject = getName(Object.class);
-        String nameArrayClass = getName(Class[].class);
+        String nameObject = Object.class.getName();
+        String nameArrayClass = Class[].class.getName();
 
         Assertions.assertEquals("java.lang.Object", nameObject);
         Assertions.assertEquals("[L" + "java.lang.Class;", nameArrayClass);

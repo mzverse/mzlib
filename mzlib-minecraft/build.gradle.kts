@@ -43,6 +43,7 @@ dependencies {
 tasks.shadowJar {
     manifest {
         attributes(
+            "paperweight-mappings-namespace" to "mojang", // fuck Paper
             "Main-Class" to "mz.mzlib.minecraft.vanilla.MzLibMinecraftInitializer",
         )
     }

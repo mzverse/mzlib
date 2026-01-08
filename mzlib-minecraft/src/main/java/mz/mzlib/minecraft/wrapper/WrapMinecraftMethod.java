@@ -73,7 +73,7 @@ public @interface WrapMinecraftMethod
                                     return new String[]{
                                         MinecraftPlatform.instance.getMappings().inverse().mapMethod(
                                             MinecraftPlatform.instance.getMappings().mapClass(
-                                                ClassUtil.getName(WrapperObject.getWrappedClass(wrapperClass))),
+                                                WrapperObject.getWrappedClass(wrapperClass).getName()),
                                             new MappingMethod(
                                                 name.name(),
                                                 Arrays.stream(wrapperMethod.getParameterTypes()).map(c ->

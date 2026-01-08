@@ -2,13 +2,14 @@ package mz.mzlib.minecraft.vanilla;
 
 import mz.mzlib.minecraft.MinecraftPlatform;
 import mz.mzlib.minecraft.entity.player.EntityPlayer;
-import mz.mzlib.minecraft.mappings.*;
+import mz.mzlib.minecraft.mappings.Mappings;
+import mz.mzlib.minecraft.mappings.MappingsPipe;
+import mz.mzlib.minecraft.mappings.MinecraftMappingsFetcherYarn;
+import mz.mzlib.minecraft.mappings.MinecraftMappingsFetcherYarnIntermediary;
 import mz.mzlib.util.RuntimeUtil;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 public class MinecraftPlatformVanilla implements MinecraftPlatform
@@ -64,13 +65,15 @@ public class MinecraftPlatformVanilla implements MinecraftPlatform
     {
         if(this.mappings != null)
             return this.mappings;
+        File folder = new File(getMzLibDataFolder(), "mappings");
+        if(this.getVersion() >= 2601)
+            return this.mappings = MinecraftPlatform.getMappingsV2601(folder);
         try
         {
-            File folder = new File(getMzLibDataFolder(), "mappings");
-            List<Mappings<?>> result = new ArrayList<>();
-            result.add(new MinecraftMappingsFetcherYarnIntermediary().fetch(getVersionString(), folder));
-            result.add(new MinecraftMappingsFetcherYarn().fetch(getVersionString(), folder));
-            return this.mappings = new MappingsPipe(result);
+            return this.mappings = new MappingsPipe(
+                new MinecraftMappingsFetcherYarnIntermediary().fetch(getVersionString(), folder),
+                new MinecraftMappingsFetcherYarn().fetch(getVersionString(), folder)
+            );
         }
         catch(Throwable e)
         {

@@ -57,7 +57,7 @@ public @interface WrapMinecraftInnerClass
                         return ClassUtil.classForName(
                             MinecraftPlatform.instance.getMappings().inverse()
                                 .mapClass(MinecraftPlatform.instance.getMappings().mapClass(
-                                    ClassUtil.getName(WrapperObject.getWrappedClass(annotation.outer()))) + "$" +
+                                    WrapperObject.getWrappedClass(annotation.outer()).getName()) + "$" +
                                     inner.name()),
                             classLoader
                         );

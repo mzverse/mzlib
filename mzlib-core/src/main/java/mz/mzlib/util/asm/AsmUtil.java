@@ -817,7 +817,7 @@ public class AsmUtil
     }
     public static String getType(Class<?> clazz)
     {
-        return getType(ClassUtil.getName(clazz));
+        return getType(clazz.getName());
     }
 
     public static String getDesc(String type)

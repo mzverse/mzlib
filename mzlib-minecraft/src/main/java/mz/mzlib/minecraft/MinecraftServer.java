@@ -186,7 +186,8 @@ public interface MinecraftServer extends WrapperObject, CommandOutput, Instance,
     @VersionRange(begin = 1300)
     @WrapMinecraftMethod({
         @VersionName(name = "method_20331", end = 1400),
-        @VersionName(name = "getRecipeManager", remap = false, begin = 1400)
+        @VersionName(name = "getRecipeManager", begin = 1400, end = 2601),
+        @VersionName(name = "getRecipeManager", remap = false, begin = 2601)
     })
     RecipeManager getRecipeManagerV1300();
 

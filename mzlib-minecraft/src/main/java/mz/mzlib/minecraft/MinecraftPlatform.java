@@ -1,7 +1,7 @@
 package mz.mzlib.minecraft;
 
 import mz.mzlib.minecraft.entity.player.EntityPlayer;
-import mz.mzlib.minecraft.mappings.Mappings;
+import mz.mzlib.minecraft.mappings.*;
 import mz.mzlib.util.ElementSwitcher;
 import mz.mzlib.util.ElementSwitcherClass;
 import mz.mzlib.util.Instance;
@@ -45,6 +45,15 @@ public interface MinecraftPlatform extends Instance
     File getMzLibDataFolder();
 
     Mappings<?> getMappings();
+
+    static Mappings<?> getMappingsV2601(File folder)
+    {
+        return new MappingsPipe(
+            new MinecraftMappingsFetcherMojang().fetch("1.21.11", folder),
+            new MinecraftMappingsFetcherYarnIntermediary().fetch("1.21.11", folder),
+            new MinecraftMappingsFetcherYarn().fetch("1.21.11", folder)
+        );
+    }
 
     static int parseVersion(String version)
     {

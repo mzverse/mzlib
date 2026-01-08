@@ -28,7 +28,7 @@ public class MinecraftPlatformBukkit implements MinecraftPlatform
     @Override
     public String getLanguage(EntityPlayer player)
     {
-        if(MinecraftPlatform.instance.getVersion() < 1200)
+        if(this.getVersion() < 1200)
             return this.getLanguageV_1200(player);
         else
             return this.getLanguageV1200(player);
@@ -131,9 +131,11 @@ public class MinecraftPlatformBukkit implements MinecraftPlatform
         }
         if(this.mappings != null)
             return this.mappings;
+        File folder = new File(getMzLibDataFolder(), "mappings");
+        if(this.getVersion() >= 2601)
+            return this.mappings = MinecraftPlatform.getMappingsV2601(folder);
         try
         {
-            File folder = new File(getMzLibDataFolder(), "mappings");
             List<Mappings<?>> result = new ArrayList<>();
             if(this.isPaper() && this.getVersion() >= 2005)
                 result.add(new MinecraftMappingsFetcherMojang().fetch(getVersionString(), folder));
