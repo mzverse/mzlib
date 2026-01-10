@@ -13,23 +13,49 @@
 
 高手，请使用gradle(kts)导入，在build.gradle.kts中添加：
 
+== 中心仓库（推荐）
+
 ```kts
 repositories {
-    maven("https://maven.pkg.github.com/mzverse/mzlib") {
-        credentials {
-            username = System.getenv("GITHUB_USERNAME")
-            password = System.getenv("GITHUB_TOKEN")
-        }
+    mavenCentral()
+    maven {
+        name = "CentralPortalSnapshots"
+        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
     }
+    mavenLocal()
 }
 dependencies {
-    compileOnly("org.mzverse:mzlib-minecraft:latest.integration")
+    compileOnly("org.mzverse:mzlib-minecraft:latest.release")
 }
 ```
 
-确保你的环境变量中有GITHUB_USERNAME和GITHUB_TOKEN，并且token具有read:packages权限。
+以上步骤依赖了最新版，如需依赖最新快照版请将`latest.release`改为`latest.integration`
 
-以上步骤依赖了最新快照版，仅依赖最新版请将"latest.integration"改为"latest.release"
+如需依赖固定版本，请将`latest.release`替换为具体版本号，如`10.0.1-beta.17`
+
+== GitHub Packages
+
+如果不想使用中心仓库，可使用 GitHub Packages：
+
+```kts
+repositories {
+    var actionGithub: MavenArtifactRepository.() -> Unit = {
+        credentials {
+            username = if (System.getenv("CI") != null)
+                System.getenv("GITHUB_ACTOR")
+            else
+                System.getenv("GITHUB_USERNAME")
+            password = System.getenv("GITHUB_TOKEN")
+        }
+    }
+    maven("https://maven.pkg.github.com/mzverse/mzlib", actionGithub)
+}
+dependencies {
+    compileOnly("org.mzverse:mzlib-minecraft:latest.release")
+}
+```
+
+确保你的环境变量中有`GITHUB_USERNAME`和`GITHUB_TOKEN`，并且token具有`read:packages`权限。
 
 = 版本表示和名称约定
 

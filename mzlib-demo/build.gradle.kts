@@ -23,3 +23,11 @@ dependencies {
     testImplementation(project(":mzlib-minecraft"))
     testImplementation(files("../lib"))
 }
+
+tasks.shadowJar {
+    manifest {
+        attributes(
+            "paperweight-mappings-namespace" to "mojang", // fuck Paper
+        )
+    }
+}

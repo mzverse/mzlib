@@ -1,3 +1,5 @@
+description = "A Minecraft Engine Library"
+
 repositories {
     maven("https://maven.neoforged.net/releases")
 }

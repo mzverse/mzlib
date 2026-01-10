@@ -21,22 +21,21 @@
 
 # 📦 依赖
 
-确保环境变量中有 `GITHUB_USERNAME` 和 `GITHUB_TOKEN`（token 需要 `read:packages` 权限）。
+## 中心仓库和快照
 
-[创建 Token](https://github.com/settings/tokens/new)
+使用中心仓库，可选的中心快照仓库和本地仓库。
 
 ```kts
 repositories {
-    maven("https://maven.pkg.github.com/mzverse/mzlib") {
-        credentials {
-            username = System.getenv("GITHUB_USERNAME")
-            password = System.getenv("GITHUB_TOKEN")
-        }
+    mavenCentral()
+    maven {
+        name = "CentralPortalSnapshots"
+        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
     }
+    mavenLocal()
 }
-
 dependencies {
-    compileOnly("org.mzverse:mzlib-minecraft:latest.integration")
+    compileOnly("org.mzverse:mzlib-minecraft:latest.release")
 }
 ```
 
@@ -44,7 +43,33 @@ dependencies {
 
 ```kts
 dependencies {
-    compileOnly("org.mzverse:mzlib-core:latest.integration")
+    compileOnly("org.mzverse:mzlib-core:latest.release")
+}
+```
+
+我们强烈建议您使用最新版本，甚至如果您希望使用最新快照：将 `latest.release` 替换为 `latest.integration`。
+
+如果希望依赖固定版本，替换`latest.release`，如`10.0.1-beta.17`
+
+## GitHub Packages
+
+如果不想使用中心仓库（Why?），可使用 GitHub Packages。
+
+确保环境变量中有 `GITHUB_USERNAME` 和 `GITHUB_TOKEN`（token 需要 `read:packages` 权限）。
+[创建Token](https://github.com/settings/tokens/new)
+
+```kts
+repositories {
+    var actionGithub: MavenArtifactRepository.() -> Unit = {
+        credentials {
+            username = if (System.getenv("CI") != null)
+                System.getenv("GITHUB_ACTOR")
+            else
+                System.getenv("GITHUB_USERNAME")
+            password = System.getenv("GITHUB_TOKEN")
+        }
+    }
+    maven("https://maven.pkg.github.com/mzverse/mzlib", actionGithub)
 }
 ```
 

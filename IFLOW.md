@@ -12,7 +12,7 @@ MzLib 是一个跨平台的 Minecraft 开发类库，旨在简化 Minecraft 插�
 - **文档系统**: Typst → HTML
 - **CI/CD**: GitHub Actions
 - **版本控制**: Git
-- **包管理**: GitHub Packages
+- **包管理**: Maven Central（推荐）、GitHub Packages
 
 ### 1.3 架构设计
 项目主要由两部分组成：
@@ -133,7 +133,61 @@ BUILD_TYPE=release ./gradlew build
 ./gradlew build
 ```
 
-### 2.6 其他有用命令
+### 2.6 依赖配置
+
+#### 中心仓库（推荐）
+
+使用中心仓库，可选的中心快照仓库和本地仓库。
+
+```kotlin
+repositories {
+    mavenCentral()
+    maven {
+        name = "CentralPortalSnapshots"
+        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+    }
+    mavenLocal()
+}
+dependencies {
+    compileOnly("org.mzverse:mzlib-minecraft:latest.release")
+}
+```
+
+仅依赖核心模块：
+
+```kotlin
+dependencies {
+    compileOnly("org.mzverse:mzlib-core:latest.release")
+}
+```
+
+**版本选择**：
+- 强烈建议使用最新版本，甚至使用最新快照：将 `latest.release` 替换为 `latest.integration`
+- 如果希望依赖固定版本，替换 `latest.release`，如 `10.0.1-beta.17`
+
+#### GitHub Packages
+
+如果不想使用中心仓库，可使用 GitHub Packages。
+
+确保环境变量中有 `GITHUB_USERNAME` 和 `GITHUB_TOKEN`（token 需要 `read:packages` 权限）。
+[创建 Token](https://github.com/settings/tokens/new)
+
+```kotlin
+repositories {
+    var actionGithub: MavenArtifactRepository.() -> Unit = {
+        credentials {
+            username = if (System.getenv("CI") != null)
+                System.getenv("GITHUB_ACTOR")
+            else
+                System.getenv("GITHUB_USERNAME")
+            password = System.getenv("GITHUB_TOKEN")
+        }
+    }
+    maven("https://maven.pkg.github.com/mzverse/mzlib", actionGithub)
+}
+```
+
+### 2.7 其他有用命令
 ```bash
 # 查看所有可用任务
 ./gradlew tasks
@@ -1243,7 +1297,7 @@ PacketListenerRegistry.register(new PacketListenerAdapter() {
 - **`.github/workflows/build.yml`**: 构建和测试流程
   - 使用 JDK 21
   - 运行 Gradle 构建
-  - 发布到 GitHub Packages
+  - 发布到 Maven Central 和 GitHub Packages
   - 自动创建 GitHub Release（标签推送时）
 - **`.github/workflows/docs.yml`**: 文档部署流程
   - 使用 Rust Toolchain
@@ -1401,6 +1455,31 @@ open build/reports/build/index.html  # macOS
 
 # 发布
 ./gradlew publishToMavenLocal
+./gradlew publish
+```
+
+### 依赖配置速查
+
+**中心仓库（推荐）**：
+```kotlin
+repositories {
+    mavenCentral()
+    maven {
+        name = "CentralPortalSnapshots"
+        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+    }
+    mavenLocal()
+}
+dependencies {
+    compileOnly("org.mzverse:mzlib-minecraft:latest.release")
+}
+```
+
+**仅核心模块**：
+```kotlin
+dependencies {
+    compileOnly("org.mzverse:mzlib-core:latest.release")
+}
 ```
 
 ### 关键包路径
@@ -1471,7 +1550,30 @@ open build/reports/build/index.html  # macOS
 - 链接应该指向编译后的 HTML 文件，而不是源文件
 - Typst 会自动处理文件扩展名
 
-### 11.5 Typst 标题层级规则
+### 11.5 Typst 标识符下划线规则
+
+在 Typst 文档中，下划线（`_`）是特殊符号，用于表示下标或其他特殊用途。因此，标识符中的下划线需要使用反引号（`` ` ``）包裹。
+
+**错误示例**：
+```typst
+latest.release
+GITHUB_USERNAME
+mzlib_core
+```
+
+**正确示例**：
+```typst
+`latest.release`
+`GITHUB_USERNAME`
+`mzlib_core`
+```
+
+**原因**：
+- Typst 将下划线视为特殊符号
+- 不使用反引号包裹会导致解析错误
+- 反引号会将内容视为代码或标识符
+
+### 11.6 Typst 标题层级规则
 在编写 Typst 文档时，必须遵守标题层级的规范：
 
 **标题符号**：
@@ -1506,7 +1608,7 @@ open build/reports/build/index.html  # macOS
 - 便于阅读和维护
 - 符合 Typst 的语法规范
 
-### 11.6 模块系统核心概念
+### 11.7 模块系统核心概念
 
 模块系统是 MzLib 的核心概念之一，用于模块化编写各功能并管理生命周期。
 

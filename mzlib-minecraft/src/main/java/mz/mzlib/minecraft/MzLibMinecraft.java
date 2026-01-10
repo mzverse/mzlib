@@ -31,7 +31,9 @@ public class MzLibMinecraft extends MzModule
 {
     public static MzLibMinecraft instance = new MzLibMinecraft();
 
-    public final String MOD_ID = "mzlib";
+    public static final String MODID = "mzlib";
+
+    public final String MOD_ID = MODID;
 
     public Config config;
 

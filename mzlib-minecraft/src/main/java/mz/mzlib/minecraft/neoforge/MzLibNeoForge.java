@@ -1,11 +1,12 @@
 package mz.mzlib.minecraft.neoforge;
 
 import mz.mzlib.MzLib;
+import mz.mzlib.minecraft.MzLibMinecraft;
 import mz.mzlib.minecraft.vanilla.MzLibMinecraftInitializer;
 import mz.mzlib.module.MzModule;
 import net.neoforged.fml.common.Mod;
 
-@Mod("mzlib")
+@Mod(MzLibMinecraft.MODID)
 public class MzLibNeoForge extends MzModule
 {
     public static MzLibNeoForge instance;

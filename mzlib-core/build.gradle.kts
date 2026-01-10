@@ -1,3 +1,5 @@
+description = "A Java Library"
+
 dependencies {
     @Suppress("VulnerableLibrariesLocal", "RedundantSuppression")
     api("moe.karla.unsafe:unsafe-accessor-root:1.2.0")

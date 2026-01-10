@@ -1,10 +1,12 @@
-import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
-import org.gradle.internal.extensions.stdlib.toDefaultLowerCase
+import java.net.HttpURLConnection
+import java.net.URI
+import java.util.Base64
 
 plugins {
     id("java-library")
     id("com.github.johnrengelman.shadow") version "8.1.1"
     `maven-publish`
+    signing
 }
 
 val outputDir = File(rootProject.projectDir, "out")
@@ -188,17 +190,23 @@ tasks.register("buildDocs") {
     dependsOn("validateDeploy")
 }
 
+val isSnapshot = !(System.getenv("BUILD_TYPE")?.equals("release", ignoreCase = true) ?: false)
+
 allprojects {
     group = "org.mzverse"
-    val baseVersion = "10.0.1-beta.17"
-    version = if (System.getenv("BUILD_TYPE")?.equals("release", ignoreCase = true) ?: false) {
-        baseVersion
-    } else {
+    val baseVersion = "10.0.1-beta.18"
+    version = if (isSnapshot) {
         "$baseVersion-SNAPSHOT"
+    } else {
+        baseVersion
     }
 
     repositories {
         mavenCentral()
+        maven {
+            name = "Central Portal Snapshots"
+            url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+        }
         mavenLocal()
         gradlePluginPortal()
         maven("https://maven.fabricmc.net/")
@@ -218,6 +226,7 @@ allprojects {
         plugin("java-library")
         plugin("com.github.johnrengelman.shadow")
         plugin("maven-publish")
+        plugin("signing")
     }
 }
 
@@ -226,6 +235,7 @@ subprojects {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
         withSourcesJar()
+        withJavadocJar()
     }
 
     components {
@@ -271,7 +281,7 @@ subprojects {
         }
         shadowJar {
             destinationDirectory = outputDir
-            transform(ServiceFileTransformer::class.java)
+            mergeServiceFiles()
         }
         build {
             dependsOn(shadowJar)
@@ -291,7 +301,17 @@ subprojects {
                         from(components["java"])
 
                         pom {
+                            name = project.name
+                            description = project.description
                             url = "https://github.com/mzverse/mzlib"
+                            developers {
+                                developer {
+                                    id = "mzmzpwq"
+                                    name = "mz"
+                                    email = "2323346933@qq.com"
+                                    url = "https://github.com/mzmzpwq"
+                                }
+                            }
                             licenses {
                                 license {
                                     name.set("Mozilla Public License Version 2.0")
@@ -311,8 +331,21 @@ subprojects {
                         }
                     }
                 }
-                repositories {
-                    if(System.getenv("CI") != null) {
+            }
+            if(System.getenv("CI") != null) {
+                publishing {
+                    repositories {
+                        maven {
+                            name = "MavenCentral"
+                            url = if (isSnapshot)
+                                uri("https://central.sonatype.com/repository/maven-snapshots/")
+                            else
+                                uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
+                            credentials {
+                                username = System.getenv("OSSRH_USERNAME")
+                                password = System.getenv("OSSRH_PASSWORD")
+                            }
+                        }
                         maven {
                             name = "GitHubPackages"
                             url = uri("https://maven.pkg.github.com/mzverse/mzlib")
@@ -323,6 +356,26 @@ subprojects {
                         }
                     }
                 }
+                if(!isSnapshot) {
+                    tasks["publishMavenPublicationToMavenCentralRepository"].doLast {
+                        with(
+                            URI("https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/${project.group}?publishing_type=automatic").toURL()
+                                .openConnection() as HttpURLConnection
+                        ) {
+                            requestMethod = "POST"
+                            val token = Base64.getEncoder()
+                                .encodeToString("${System.getenv("OSSRH_USERNAME")}:${System.getenv("OSSRH_PASSWORD")}".toByteArray())
+                                .trim()
+                            setRequestProperty("Authorization", "Bearer $token")
+                            getInputStream()
+                            println("✅ Published to MavenCentral: $responseCode")
+                        }
+                    }
+                }
+            }
+            signing {
+                useInMemoryPgpKeys(System.getenv("PGP_KEY"), System.getenv("PGP_PASSWORD"))
+                sign(publishing.publications["maven"])
             }
         }
     }
