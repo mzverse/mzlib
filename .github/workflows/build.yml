@@ -28,6 +28,13 @@ jobs:
           startsWith(github.ref, 'refs/tags/')
         run: echo "BUILD_TYPE=release" >> $GITHUB_ENV
 
+      - name: Secrets
+        run: |
+          echo "PGP_KEY=${{ secrets.PGP_KEY }}" >> $GITHUB_ENV
+          echo "PGP_PASSWORD=${{ secrets.PGP_PASSWORD }}" >> $GITHUB_ENV
+          echo "OSSRH_USERNAME=${{ secrets.OSSRH_USERNAME }}" >> $GITHUB_ENV
+          echo "OSSRH_PASSWORD=${{ secrets.OSSRH_PASSWORD }}" >> $GITHUB_ENV
+
       - name: Make gradle wrapper executable
         run: chmod +x ./gradlew
 
