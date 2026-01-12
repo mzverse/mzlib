@@ -1,6 +1,5 @@
 package mz.mzlib.util;
 
-import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
@@ -13,15 +12,6 @@ public class RefWeak<T> implements Ref<T>
     {
         this.set(value);
     }
-    public RefWeak(T value, ReferenceQueue<T> queue)
-    {
-        this.set(value, queue);
-    }
-
-    public WeakReference<T> getDelegate()
-    {
-        return this.delegate;
-    }
 
     @Override
     public T get()
@@ -33,11 +23,6 @@ public class RefWeak<T> implements Ref<T>
     public void set(T value)
     {
         this.delegate = new WeakReference<>(value);
-        this.hashCode = System.identityHashCode(value);
-    }
-    public void set(T value, ReferenceQueue<T> queue)
-    {
-        this.delegate = new WeakReference<>(value, queue);
         this.hashCode = System.identityHashCode(value);
     }
 

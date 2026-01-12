@@ -1,6 +1,6 @@
 import java.net.HttpURLConnection
 import java.net.URI
-import java.util.Base64
+import java.util.*
 
 plugins {
     id("java-library")
@@ -283,6 +283,21 @@ subprojects {
             destinationDirectory = outputDir
             mergeServiceFiles()
         }
+        withType<Javadoc> {
+            options {
+                jFlags = listOf(
+                    "-Dfile.encoding=UTF-8",
+                    "-Dsun.jnu.encoding=UTF-8",
+                    "-Dnative.encoding=UTF-8",
+                    "-Dsun.stdout.encoding=UTF-8",
+                    "-Dsun.stderr.encoding=UTF-8"
+                )
+                encoding = "UTF-8"
+                this as StandardJavadocDocletOptions
+                charSet = "UTF-8"
+                docEncoding = "UTF-8"
+            }
+        }
         build {
             dependsOn(shadowJar)
             dependsOn(publishToMavenLocal)
@@ -372,10 +387,10 @@ subprojects {
                         }
                     }
                 }
-            }
-            signing {
-                useInMemoryPgpKeys(System.getenv("PGP_KEY"), System.getenv("PGP_PASSWORD"))
-                sign(publishing.publications["maven"])
+                signing {
+                    useInMemoryPgpKeys(System.getenv("PGP_KEY"), System.getenv("PGP_PASSWORD"))
+                    sign(publishing.publications["maven"])
+                }
             }
         }
     }
