@@ -1,5 +1,6 @@
 package mz.mzlib.minecraft;
 
+import mz.mzlib.util.Pair;
 import mz.mzlib.util.nothing.Nothing;
 import mz.mzlib.util.nothing.NothingInject;
 import mz.mzlib.util.nothing.NothingInjectType;
@@ -15,11 +16,12 @@ public interface NothingMinecraftServer extends MinecraftServer, Nothing
     @NothingInject(wrapperMethodName = "tickV_1300", wrapperMethodParams = {}, locateMethod = "locateAllReturn", type = NothingInjectType.INSERT_BEFORE)
     default void tickEndV_1300()
     {
-        while(!waitingTasks.isEmpty() && Objects.requireNonNull(waitingTasks.peek()).getFirst() - tickNumber.get() <= 0)
+        Pair<Long, Runnable> task;
+        while((task = waitingTasks.poll()) != null && task.getFirst() - tickNumber.get() <= 0)
         {
             try
             {
-                Objects.requireNonNull(waitingTasks.poll()).getSecond().run();
+                task.getSecond().run();
             }
             catch(Throwable e)
             {
