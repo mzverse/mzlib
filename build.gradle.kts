@@ -4,6 +4,7 @@ import java.util.*
 
 plugins {
     id("java-library")
+    kotlin("jvm") version "2.2.20"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     `maven-publish`
     signing
@@ -224,9 +225,21 @@ allprojects {
 
     apply {
         plugin("java-library")
+        plugin("kotlin")
         plugin("com.github.johnrengelman.shadow")
         plugin("maven-publish")
         plugin("signing")
+    }
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+            apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_5)
+            languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_5)
+        }
+    }
+    dependencies {
+        compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8:latest.release")
+        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:latest.release")
     }
 }
 
@@ -247,6 +260,7 @@ subprojects {
     }
 
     dependencies {
+        testImplementation(kotlin("test"))
         testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     }

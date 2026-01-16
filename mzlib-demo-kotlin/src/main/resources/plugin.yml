@@ -1,0 +1,7 @@
+name: MzLibDemoKotlin
+version: ${version}
+authors:
+  - "mz"
+main: mz.mzlib.demokt.entrypoint.DemoKotlinBukkit
+depend: [ MzLib ]
+api-version: 1.13

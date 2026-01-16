@@ -20,7 +20,6 @@ import mz.mzlib.util.wrapper.SpecificImpl;
 import mz.mzlib.util.wrapper.WrapperFactory;
 import mz.mzlib.util.wrapper.WrapperObject;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
@@ -88,8 +87,7 @@ public interface MinecraftServer extends WrapperObject, CommandOutput, Instance,
 
     RefStrong<Long> tickNumber = new RefStrong<>(0L);
     Queue<Pair<Long, Runnable>> waitingTasks = new PriorityBlockingQueue<>(
-        11, Collections.reverseOrder(
-        Pair.comparingByFirst(Comparator.comparingLong(x -> x - tickNumber.get())))
+        11, Pair.comparingByFirst(Comparator.comparingLong(x -> x - tickNumber.get()))
     );
 
     @Override
