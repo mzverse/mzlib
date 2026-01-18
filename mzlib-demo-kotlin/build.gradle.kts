@@ -14,6 +14,9 @@ dependencies {
         }
         isTransitive = false
     }
+
+    testImplementation(project(":mzlib-core"))
+    testImplementation(project(":mzlib-minecraft"))
 }
 
 tasks.shadowJar {

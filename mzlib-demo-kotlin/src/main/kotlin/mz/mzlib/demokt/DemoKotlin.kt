@@ -11,6 +11,7 @@ import mz.mzlib.minecraft.text.TextColor
 import mz.mzlib.module.MzModule
 import mz.mzlib.util.async.await
 
+
 object DemoKotlin: MzModule() {
     override fun onLoad() {
         val is1 = ItemStack {

@@ -2,7 +2,7 @@ package mz.mzlib.util;
 
 import java.util.function.Supplier;
 
-public class LazyConstant<T>
+public class LazyConstant<T> implements Supplier<T>
 {
     public Option<T> value;
     public Supplier<T> initizer;
@@ -21,6 +21,7 @@ public class LazyConstant<T>
         this.value = Option.fromNullable(initizer.get());
     }
 
+    @Override
     public T get()
     {
         if(this.value != null)

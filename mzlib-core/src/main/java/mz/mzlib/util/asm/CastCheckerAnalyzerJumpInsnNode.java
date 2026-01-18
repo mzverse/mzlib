@@ -23,6 +23,8 @@ public class CastCheckerAnalyzerJumpInsnNode extends CastCheckerAnalyzer<JumpIns
             case Opcodes.IFGE:
             case Opcodes.IFGT:
             case Opcodes.IFLE:
+            case Opcodes.IFNULL:
+            case Opcodes.IFNONNULL:
                 context.pop();
                 break;
             case Opcodes.IF_ICMPEQ:
@@ -38,9 +40,6 @@ public class CastCheckerAnalyzerJumpInsnNode extends CastCheckerAnalyzer<JumpIns
                 break;
             case Opcodes.GOTO:
                 return Collections.singleton(analyzer.labels.get(insn.label.getLabel()));
-            case Opcodes.IFNULL:
-            case Opcodes.IFNONNULL:
-                context.pop();
             case Opcodes.JSR:
             default:
                 throw new UnsupportedOperationException();

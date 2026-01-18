@@ -41,9 +41,7 @@ public abstract class AsyncFunction<R> implements Runnable
     public static void await(BasicAwait await)
     {
         if(RuntimeUtil.nul() == null)
-        {
-            throw new UnsupportedOperationException("Must be invoked by async function via 'this'.");
-        }
+            throw new UnsupportedOperationException("Must be invoked by async function.");
     }
 
     /**
@@ -55,7 +53,7 @@ public abstract class AsyncFunction<R> implements Runnable
         await(null);
     }
 
-    public AsyncFunctionRunner runner;
+    protected AsyncFunctionRunner runner;
 
     public AsyncFunctionRunner getRunner()
     {
@@ -64,11 +62,12 @@ public abstract class AsyncFunction<R> implements Runnable
 
     public CompletableFuture<R> start(AsyncFunctionRunner runner)
     {
+        if(this.context != null)
+            throw new IllegalStateException("Async function already started.");
         this.runner = runner;
-        if(this.context == null)
-            this.context = AsyncFunctionContext.init(this);
+        AsyncFunctionContext.init(this);
         runner.schedule(this);
-        return RuntimeUtil.cast(context.future);
+        return this.context.future;
     }
     public CompletableFuture<R> start(Executor executor)
     {
@@ -76,7 +75,7 @@ public abstract class AsyncFunction<R> implements Runnable
     }
 
 
-    public AsyncFunctionContext context;
+    protected AsyncFunctionContext<R> context;
 
     public void run(Object result, Throwable e)
     {

@@ -7,8 +7,8 @@ import java.util.Queue;
 
 public class IndexAllocator<T>
 {
-    public List<T> list;
-    public Queue<Integer> bin;
+    List<T> list;
+    Queue<Integer> bin;
 
     public IndexAllocator()
     {
@@ -37,5 +37,10 @@ public class IndexAllocator<T>
     public void set(int index, T value)
     {
         this.list.set(index, value);
+    }
+
+    public int size()
+    {
+        return this.list.size() - this.bin.size();
     }
 }
