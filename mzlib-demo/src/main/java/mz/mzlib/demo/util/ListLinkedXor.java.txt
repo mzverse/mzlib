@@ -1,0 +1,150 @@
+package mz.mzlib.demo.util;
+
+import jakarta.annotation.Nonnull;
+import mz.mzlib.util.IndexAllocator;
+
+import java.util.AbstractList;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
+
+public class ListLinkedXor<T> extends AbstractList<T>
+{
+    static class Node<T>
+    {
+        int xor;
+        T value;
+    }
+
+    IndexAllocator<Node<T>> allocator = new IndexAllocator<>();
+    int begin = -1;
+    int end = -1;
+
+    @Override
+    public T get(int index)
+    {
+        for(T value : this)
+        {
+            if(index-- == 0)
+                return value;
+        }
+        throw new IndexOutOfBoundsException();
+    }
+    @Override
+    public int size()
+    {
+        return this.allocator.size();
+    }
+
+    @Override
+    @Nonnull
+    public ListIterator<T> listIterator()
+    {
+        return this.new Itr(0, -1, this.begin);
+    }
+    @Override
+    @Nonnull
+    public ListIterator<T> listIterator(int index)
+    {
+        ListIterator<T> result = this.listIterator();
+        while(index-- > 0)
+            result.next();
+        return result;
+    }
+    @Override
+    @Nonnull
+    public Iterator<T> iterator()
+    {
+        return this.listIterator();
+    }
+
+    class ListItr implements ListIterator<T>
+    {
+        int nextIndex;
+        int prev, next;
+        ListItr(int nextIndex, int prev, int next)
+        {
+            this.nextIndex = nextIndex;
+            this.prev = prev;
+            this.next = next;
+        }
+        @Override
+        public boolean hasNext()
+        {
+            return this.next != -1;
+        }
+        @Override
+        public T next()
+        {
+            if(!this.hasNext())
+                throw new NoSuchElementException();
+            int nx = this.next;
+            Node<T> node = ListLinkedXor.this.allocator.get(nx);
+            this.next = node.xor ^ this.prev;
+            this.prev = nx;
+            this.nextIndex++;
+            return node.value;
+        }
+        @Override
+        public boolean hasPrevious()
+        {
+            return this.inverse().hasNext();
+        }
+        @Override
+        public T previous()
+        {
+            T result = this.inverse().next();
+            this.last = this.inverse().last = this.inverse();
+            return result;
+        }
+        @Override
+        public int nextIndex()
+        {
+            return this.nextIndex;
+        }
+        @Override
+        public int previousIndex()
+        {
+            return this.nextIndex() - 1;
+        }
+        @Override
+        public void remove()
+        {
+            if(this.last == null)
+                throw new IllegalStateException();
+            if(this.last != this)
+            {
+                this.last.remove();
+                return;
+            }
+            int removed = this.prev;
+            this.prev = ListLinkedXor.this.allocator.get(this.prev).xor ^ this.next;
+            if(this.prev != -1)
+                ListLinkedXor.this.allocator.get(this.prev).xor ^= removed ^ this.next;
+            else
+                ListLinkedXor.this.begin = this.next;
+            if(this.next != -1)
+                ListLinkedXor.this.allocator.get(this.next).xor ^= removed ^ this.prev;
+            else
+                ListLinkedXor.this.end = this.prev;
+            ListLinkedXor.this.allocator.free(removed);
+        }
+        @Override
+        public void set(T value)
+        {
+            if(this.last == null)
+                throw new IllegalStateException();
+            if(this.last != this)
+            {
+                this.last.set(value);
+                return;
+            }
+            ListLinkedXor.this.allocator.get(this.prev).value = value;
+        }
+        @Override
+        public void add(T t)
+        {
+
+        }
+    }
+}

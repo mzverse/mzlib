@@ -1,7 +1,5 @@
-package mz.mzlib.util;
+package mz.mzlib.util.async;
 
-import mz.mzlib.util.async.BasicAwait;
-import mz.mzlib.util.async.GeneratorFunction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -1,13 +1,13 @@
 package mz.mzlib.event;
 
-import mz.mzlib.util.TaskList;
+import mz.mzlib.util.TaskQueue;
 
 /**
  * Every child class must implement {@link #call()} and be registered
  */
 public abstract class Event
 {
-    public TaskList futureTasks = new TaskList();
+    public TaskQueue futureTasks = new TaskQueue();
     boolean isCancelled = false;
 
     /**

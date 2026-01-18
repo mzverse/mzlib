@@ -3,7 +3,7 @@ package mz.mzlib.minecraft.network.packet;
 import io.netty.channel.Channel;
 import mz.mzlib.minecraft.entity.player.EntityPlayer;
 import mz.mzlib.util.Option;
-import mz.mzlib.util.TaskList;
+import mz.mzlib.util.TaskQueue;
 import mz.mzlib.util.wrapper.WrapperFactory;
 
 import java.util.function.Function;
@@ -58,7 +58,7 @@ public class PacketEvent
     @Deprecated
     public boolean isCopied = false;
 
-    public TaskList syncTasks = null;
+    public TaskQueue syncTasks = null;
     public void sync(Runnable task)
     {
         if(this.syncTasks != null)

@@ -12,7 +12,7 @@ import mz.mzlib.minecraft.network.ClientConnection;
 import mz.mzlib.minecraft.network.packet.s2c.PacketBundleS2cV1904;
 import mz.mzlib.module.MzModule;
 import mz.mzlib.util.Option;
-import mz.mzlib.util.TaskList;
+import mz.mzlib.util.TaskQueue;
 import mz.mzlib.util.asm.AsmUtil;
 import mz.mzlib.util.nothing.*;
 import mz.mzlib.util.wrapper.WrapSameClass;
@@ -43,7 +43,7 @@ public class ModulePacketListener extends MzModule
             if(packet.isBundle())
             {
                 List<Packet> newPackets = new ArrayList<>();
-                TaskList synced = new TaskList();
+                TaskQueue synced = new TaskQueue();
                 Iterable<Packet> packets = packet.castTo(PacketBundleV1904.FACTORY).getPackets();
                 if(!packet.isInstanceOf(PacketBundleS2cV1904.FACTORY))
                     throw  new UnsupportedOperationException();
@@ -52,7 +52,7 @@ public class ModulePacketListener extends MzModule
                     Packet p = i.next();
                     if(this.handle(channel, player, p, newPackets::add, synced::schedule))
                         newPackets.add(p);
-                    if(!synced.tasks.isEmpty())
+                    if(!synced.isEmpty())
                     {
                         syncer.accept(() ->
                         {
@@ -81,7 +81,7 @@ public class ModulePacketListener extends MzModule
                 return true;
             PacketEvent event = new PacketEvent(channel, player, packet);
             if(Thread.currentThread() != MinecraftServer.instance.getThread())
-                event.syncTasks = new TaskList();
+                event.syncTasks = new TaskQueue();
             for(PacketListener<?> listener : sortedListeners)
             {
                 try
@@ -99,7 +99,7 @@ public class ModulePacketListener extends MzModule
             {
                 while(event.syncTasks != null)
                 {
-                    TaskList syncTasks = event.syncTasks;
+                    TaskQueue syncTasks = event.syncTasks;
                     event.syncTasks = null;
                     syncTasks.run();
                 }
